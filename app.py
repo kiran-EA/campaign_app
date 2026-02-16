@@ -840,6 +840,284 @@ def get_all_wunderkind_campaign_data():
             'error': str(e)
         }), 500
 
+# ============================================
+# WUNDERKIND SMS API ENDPOINTS
+# ============================================
+
+@app.route('/api/get_sms_message_ids', methods=['GET'])
+@login_required
+def get_sms_message_ids():
+    """Fetch available Message IDs that have MESSAGE_NAME='UNKNOWN'"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        query = """
+            SELECT DISTINCT MESSAGE_ID AS message_id
+            FROM LPDATAMART.TBL_D_SMS
+            WHERE MESSAGE_NAME = 'UNKNOWN'
+            ORDER BY MESSAGE_ID
+        """
+
+        logger.info("Executing SMS Message ID query")
+        cur.execute(query)
+        message_ids = cur.fetchall()
+        logger.info(f"SMS Message IDs fetched: {len(message_ids)} records")
+
+        cur.close()
+        conn.close()
+
+        return jsonify({
+            'success': True,
+            'data': [row['message_id'] for row in message_ids]
+        })
+    except Exception as e:
+        logger.error(f"Error fetching SMS Message IDs: {type(e).__name__}: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/get_sms_campaign_data/<message_id>', methods=['GET'])
+@login_required
+def get_sms_campaign_data(message_id):
+    """Fetch existing SMS campaign data for a Message ID"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        query = """
+            SELECT
+                CAMPAIGN_ID AS message_id,
+                GENERAL_CAMPAIGN_NAME,
+                PROMOTIONAL_TRIGGERED,
+                SOURCE_ID
+            FROM REPORTS.WUNDERKIND_SMS_CAMPAIGN_DATA
+            WHERE CAMPAIGN_ID = %s
+        """
+
+        cur.execute(query, (message_id,))
+        result = cur.fetchone()
+
+        cur.close()
+        conn.close()
+
+        if result:
+            return jsonify({
+                'success': True,
+                'data': dict(result)
+            })
+        else:
+            return jsonify({
+                'success': True,
+                'data': None
+            })
+    except Exception as e:
+        logger.error(f"Error fetching SMS campaign data: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/check_sms_message_id/<message_id>', methods=['GET'])
+@login_required
+def check_sms_message_id(message_id):
+    """Check if Message ID already exists in the SMS campaign table"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        query = """
+            SELECT COUNT(*)
+            FROM REPORTS.WUNDERKIND_SMS_CAMPAIGN_DATA
+            WHERE CAMPAIGN_ID = %s
+        """
+
+        cur.execute(query, (message_id,))
+        count = cur.fetchone()[0]
+
+        cur.close()
+        conn.close()
+
+        return jsonify({
+            'success': True,
+            'exists': count > 0
+        })
+    except Exception as e:
+        logger.error(f"Error checking SMS Message ID: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/submit_sms_campaign', methods=['POST'])
+@login_required
+def submit_sms_campaign():
+    """Insert new Wunderkind SMS campaign data"""
+    try:
+        data = request.json
+
+        message_id = data.get('message_id')
+        general_campaign_name = data.get('general_campaign_name')
+        promotional_triggered = data.get('promotional_triggered')
+        source_id = data.get('source_id')
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Check if Message ID already exists
+        try:
+            check_query = """
+                SELECT COUNT(*)
+                FROM REPORTS.WUNDERKIND_SMS_CAMPAIGN_DATA
+                WHERE CAMPAIGN_ID = %s
+            """
+            cur.execute(check_query, (message_id,))
+            if cur.fetchone()[0] > 0:
+                cur.close()
+                conn.close()
+                return jsonify({
+                    'success': False,
+                    'error': f'Message ID {message_id} already exists. Please use Update function instead.'
+                }), 400
+        except Exception:
+            conn.rollback()
+
+        # Insert new record
+        insert_query = """
+            INSERT INTO REPORTS.WUNDERKIND_SMS_CAMPAIGN_DATA (
+                CAMPAIGN_ID,
+                GENERAL_CAMPAIGN_NAME,
+                PROMOTIONAL_TRIGGERED,
+                SOURCE_ID
+            ) VALUES (%s, %s, %s, %s)
+        """
+
+        cur.execute(insert_query, (
+            message_id,
+            general_campaign_name,
+            promotional_triggered,
+            source_id
+        ))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        logger.info(f"Successfully inserted SMS campaign data for Message ID: {message_id}")
+
+        return jsonify({
+            'success': True,
+            'message': f'SMS campaign data for Message ID {message_id} inserted successfully!'
+        })
+
+    except Exception as e:
+        logger.error(f"Error submitting SMS campaign: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/update_sms_campaign', methods=['PUT'])
+@login_required
+def update_sms_campaign():
+    """Update existing Wunderkind SMS campaign data"""
+    try:
+        data = request.json
+
+        message_id = data.get('message_id')
+        general_campaign_name = data.get('general_campaign_name')
+        promotional_triggered = data.get('promotional_triggered')
+        source_id = data.get('source_id')
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        update_query = """
+            UPDATE REPORTS.WUNDERKIND_SMS_CAMPAIGN_DATA
+            SET
+                GENERAL_CAMPAIGN_NAME = %s,
+                PROMOTIONAL_TRIGGERED = %s,
+                SOURCE_ID = %s
+            WHERE CAMPAIGN_ID = %s
+        """
+
+        cur.execute(update_query, (
+            general_campaign_name,
+            promotional_triggered,
+            source_id,
+            message_id
+        ))
+
+        if cur.rowcount == 0:
+            conn.rollback()
+            cur.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': f'Message ID {message_id} not found in the database'
+            }), 404
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        logger.info(f"Successfully updated SMS campaign data for Message ID: {message_id}")
+
+        return jsonify({
+            'success': True,
+            'message': f'SMS campaign data for Message ID {message_id} updated successfully!'
+        })
+
+    except Exception as e:
+        logger.error(f"Error updating SMS campaign: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/get_all_sms_campaign_data', methods=['GET'])
+@login_required
+def get_all_sms_campaign_data():
+    """Fetch all records from REPORTS.WUNDERKIND_SMS_CAMPAIGN_DATA"""
+    try:
+        logger.info("get_all_sms_campaign_data() called")
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        query = """
+            SELECT
+                CAMPAIGN_ID as message_id,
+                GENERAL_CAMPAIGN_NAME as general_campaign_name,
+                PROMOTIONAL_TRIGGERED as promotional_triggered,
+                SOURCE_ID as source_id
+            FROM REPORTS.WUNDERKIND_SMS_CAMPAIGN_DATA
+            ORDER BY CAMPAIGN_ID DESC
+        """
+
+        logger.info("Executing all SMS campaign data query")
+        cur.execute(query)
+        results = cur.fetchall()
+        logger.info(f"SMS campaign records fetched: {len(results)} records")
+
+        cur.close()
+        conn.close()
+
+        result = {
+            'success': True,
+            'data': results,
+            'count': len(results)
+        }
+        logger.info(f"Returning {len(results)} SMS campaign records")
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Error fetching SMS campaign data: {type(e).__name__}: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    app.run(debug=debug, host='0.0.0.0', port=port)

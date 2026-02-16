@@ -21,7 +21,7 @@
         }
         
         .main-container {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto;
             background: white;
             padding: 40px;
@@ -253,29 +253,41 @@
         }
         
         .nav-tabs {
-            flex-wrap: nowrap;
             display: flex;
-            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            border-bottom: none !important;
+            justify-content: center;
         }
 
         .nav-item {
-            flex: 1;
+            flex: 0 0 auto;
         }
 
         .nav-link {
-            font-weight: 500;
-            color: #666 !important;
+            font-weight: 600;
+            color: #555 !important;
+            background: #f0f0f5;
+            border: 2px solid #ddd !important;
+            border-radius: 8px !important;
             transition: all 0.3s ease;
             white-space: nowrap;
-            padding: 10px 8px;
+            padding: 10px 18px;
             font-size: 0.85rem;
             text-align: center;
         }
 
+        .nav-link:hover {
+            background: #e8e8f5;
+            border-color: #667eea !important;
+            color: #667eea !important;
+        }
+
         .nav-link.active {
             font-weight: 700 !important;
-            color: #667eea !important;
-            border-bottom: 3px solid #667eea !important;
+            color: #fff !important;
+            background: #667eea !important;
+            border-color: #667eea !important;
         }
         
         .platform-indicator {
@@ -370,7 +382,7 @@
         </div>
 
         <!-- Tab Navigation -->
-        <ul class="nav nav-tabs mb-4" id="campaignTabs" role="tablist" style="border-bottom: 3px solid #667eea;">
+        <ul class="nav nav-tabs mb-4" id="campaignTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="bluecore-tab" data-bs-toggle="tab" data-bs-target="#bluecore-content" type="button" role="tab">
                     <i class="bi bi-lightning-fill"></i> Bluecore Email Data
@@ -389,6 +401,16 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="wunderkind-campaign-records-tab" data-bs-toggle="tab" data-bs-target="#wunderkind-campaign-records-content" type="button" role="tab">
                     <i class="bi bi-table"></i> Wunderkind Campaign Data
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="sms-tab" data-bs-toggle="tab" data-bs-target="#sms-content" type="button" role="tab">
+                    <i class="bi bi-chat-dots-fill"></i> Wunderkind SMS Data
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="sms-records-tab" data-bs-toggle="tab" data-bs-target="#sms-records-content" type="button" role="tab">
+                    <i class="bi bi-table"></i> SMS Campaign Records
                 </button>
             </li>
         </ul>
@@ -858,6 +880,200 @@
                 </div>
             </div>
             <!-- End Wunderkind Campaign Data Tab -->
+
+            <!-- Wunderkind SMS Tab -->
+            <div class="tab-pane fade" id="sms-content" role="tabpanel">
+
+        <!-- Platform Indicator -->
+        <div class="platform-indicator">
+            <i class="bi bi-chat-dots-fill"></i> Wunderkind SMS Data
+        </div>
+
+        <!-- Mode Selector -->
+        <div class="mode-selector">
+            <div class="btn-group w-100" role="group">
+                <button type="button" class="btn btn-outline-primary active" id="smsInsertModeBtn" onclick="switchSMSMode('insert')">
+                    <i class="bi bi-plus-circle"></i> Insert New SMS Campaign
+                </button>
+                <button type="button" class="btn btn-outline-success" id="smsUpdateModeBtn" onclick="switchSMSMode('update')">
+                    <i class="bi bi-pencil-square"></i> Update Existing SMS Campaign
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="loading" id="smsLoadingSpinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Processing...</p>
+        </div>
+
+        <!-- Insert Mode Form -->
+        <div id="smsInsertForm">
+            <div class="info-box">
+                <strong><i class="bi bi-info-circle"></i> Insert Mode:</strong>
+                Select a Message ID that doesn't have campaign data yet, then fill in the details.
+            </div>
+
+            <form id="smsCampaignForm" onsubmit="submitSMSForm(event)">
+                <div class="form-section">
+                    <label for="sms_message_id" class="form-label required">Message ID</label>
+                    <select class="form-select" id="sms_message_id" required>
+                        <option value="">Loading Message IDs...</option>
+                    </select>
+                    <small class="form-text text-muted">Select a Message ID from available SMS messages without data</small>
+                </div>
+
+                <div class="form-section">
+                    <label for="sms_general_campaign_name" class="form-label required">General Campaign Name</label>
+                    <input type="text" class="form-control" id="sms_general_campaign_name"
+                           placeholder="Enter campaign name" required disabled>
+                </div>
+
+                <div class="form-section">
+                    <label for="sms_promotional_triggered" class="form-label required">Promotional Triggered</label>
+                    <select class="form-select" id="sms_promotional_triggered" required disabled>
+                        <option value="">-- Select --</option>
+                        <option value="PROMOTIONAL">PROMOTIONAL</option>
+                        <option value="TRIGGERED">TRIGGERED</option>
+                        <option value="NON_TRIGGERED">NON_TRIGGERED</option>
+                    </select>
+                </div>
+
+                <div class="form-section">
+                    <label for="sms_source_id" class="form-label required">Source ID</label>
+                    <input type="text" class="form-control" id="sms_source_id"
+                           placeholder="Enter source ID" required disabled>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle"></i> Submit SMS Campaign Data
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetSMSForm()">
+                        <i class="bi bi-arrow-clockwise"></i> Reset Form
+                    </button>
+                </div>
+
+                <!-- Alert Messages for SMS Insert Form -->
+                <div id="smsAlertContainer" style="margin-top: 20px;"></div>
+            </form>
+        </div>
+
+        <!-- Update Mode Form -->
+        <div id="smsUpdateForm" style="display: none;">
+            <div class="info-box">
+                <strong><i class="bi bi-info-circle"></i> Update Mode:</strong>
+                Enter a Message ID to load existing data, modify the fields, and update.
+            </div>
+
+            <div class="form-section">
+                <label for="sms_update_message_id_input" class="form-label required">Enter Message ID to Update</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="sms_update_message_id_input"
+                           placeholder="Enter Message ID" required>
+                    <button class="btn btn-outline-primary" type="button" onclick="loadSMSCampaignData()">
+                        <i class="bi bi-search"></i> Load Data
+                    </button>
+                </div>
+            </div>
+
+            <form id="smsUpdateCampaignForm" onsubmit="updateSMSForm(event)" style="display: none;">
+                <input type="hidden" id="sms_update_message_id">
+
+                <div class="form-section">
+                    <label class="form-label">Message ID (Read-only)</label>
+                    <input type="text" class="form-control" id="sms_update_message_id_display" disabled>
+                </div>
+
+                <div class="form-section">
+                    <label for="sms_update_general_campaign_name" class="form-label required">General Campaign Name</label>
+                    <input type="text" class="form-control" id="sms_update_general_campaign_name"
+                           placeholder="Enter campaign name" required>
+                </div>
+
+                <div class="form-section">
+                    <label for="sms_update_promotional_triggered" class="form-label required">Promotional Triggered</label>
+                    <select class="form-select" id="sms_update_promotional_triggered" required>
+                        <option value="">-- Select --</option>
+                        <option value="PROMOTIONAL">PROMOTIONAL</option>
+                        <option value="TRIGGERED">TRIGGERED</option>
+                        <option value="NON_TRIGGERED">NON_TRIGGERED</option>
+                    </select>
+                </div>
+
+                <div class="form-section">
+                    <label for="sms_update_source_id" class="form-label required">Source ID</label>
+                    <input type="text" class="form-control" id="sms_update_source_id"
+                           placeholder="Enter source ID" required>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-circle"></i> Update SMS Campaign Data
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetSMSUpdateForm()">
+                        <i class="bi bi-arrow-clockwise"></i> Reset Form
+                    </button>
+                </div>
+
+                <!-- Alert Messages for SMS Update Form -->
+                <div id="smsUpdateAlertContainer" style="margin-top: 20px;"></div>
+            </form>
+        </div>
+            </div>
+            <!-- End Wunderkind SMS Tab -->
+
+            <!-- SMS Campaign Records Tab -->
+            <div class="tab-pane fade" id="sms-records-content" role="tabpanel">
+                <div class="platform-indicator">
+                    <i class="bi bi-chat-dots-fill"></i> SMS Campaign Records
+                </div>
+
+                <div class="info-box">
+                    <strong><i class="bi bi-info-circle"></i> View Mode:</strong>
+                    This tab displays all records from REPORTS.WUNDERKIND_SMS_CAMPAIGN_DATA
+                </div>
+
+                <!-- Loading Spinner -->
+                <div class="loading" id="smsCampaignRecordsLoadingSpinner" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading SMS campaign records...</p>
+                </div>
+
+                <!-- Alert Messages -->
+                <div id="smsCampaignRecordsAlertContainer"></div>
+
+                <!-- SMS Campaign Records Table -->
+                <div id="smsCampaignRecordsTableContainer" style="display: none;">
+                    <div style="margin-bottom: 15px;">
+                        <strong>Total Records: <span id="smsRecordCount">0</span></strong>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Message ID</th>
+                                    <th>General Campaign Name</th>
+                                    <th>Promotional Triggered</th>
+                                    <th>Source ID</th>
+                                </tr>
+                            </thead>
+                            <tbody id="smsCampaignRecordsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- No Records Message -->
+                <div id="noSMSRecordsMessage" style="display: none;" class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No SMS campaign records found.
+                </div>
+            </div>
+            <!-- End SMS Campaign Records Tab -->
         </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -1799,6 +2015,314 @@
         // Back button prevention will be set up after initialization
 
         // ============================================
+        // WUNDERKIND SMS FUNCTIONS
+        // ============================================
+
+        // Switch between SMS Insert and Update modes
+        function switchSMSMode(mode) {
+            const insertForm = document.getElementById('smsInsertForm');
+            const updateForm = document.getElementById('smsUpdateForm');
+            const insertBtn = document.getElementById('smsInsertModeBtn');
+            const updateBtn = document.getElementById('smsUpdateModeBtn');
+
+            if (mode === 'insert') {
+                insertForm.style.display = 'block';
+                updateForm.style.display = 'none';
+                insertBtn.classList.add('active');
+                updateBtn.classList.remove('active');
+                loadSMSMessageIds();
+            } else {
+                insertForm.style.display = 'none';
+                updateForm.style.display = 'block';
+                insertBtn.classList.remove('active');
+                updateBtn.classList.add('active');
+            }
+        }
+
+        // Load SMS Message IDs into dropdown
+        async function loadSMSMessageIds() {
+            const select = document.getElementById('sms_message_id');
+            select.innerHTML = '<option value="">Loading Message IDs...</option>';
+            showSMSLoading(true);
+
+            try {
+                const response = await fetch('/api/get_sms_message_ids', {
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    select.innerHTML = '<option value="">-- Select Message ID --</option>';
+                    result.data.forEach(id => {
+                        const option = document.createElement('option');
+                        const formattedId = Math.floor(parseFloat(id));
+                        option.value = formattedId;
+                        option.textContent = formattedId;
+                        select.appendChild(option);
+                    });
+
+                    select.addEventListener('change', function() {
+                        toggleSMSInsertFormFields(this.value !== '');
+                    });
+                } else {
+                    select.innerHTML = '<option value="">Error loading Message IDs</option>';
+                    showSMSAlert('Error loading Message IDs: ' + (result.error || 'Unknown error'), 'danger');
+                }
+            } catch (error) {
+                console.error('Error loading SMS Message IDs:', error);
+                select.innerHTML = '<option value="">Error loading Message IDs</option>';
+                showSMSAlert('Error connecting to server: ' + error.message, 'danger');
+            }
+            showSMSLoading(false);
+        }
+
+        // Toggle SMS insert form fields
+        function toggleSMSInsertFormFields(enabled) {
+            document.getElementById('sms_general_campaign_name').disabled = !enabled;
+            document.getElementById('sms_promotional_triggered').disabled = !enabled;
+            document.getElementById('sms_source_id').disabled = !enabled;
+
+            if (!enabled) {
+                document.getElementById('sms_general_campaign_name').value = '';
+                document.getElementById('sms_promotional_triggered').value = '';
+                document.getElementById('sms_source_id').value = '';
+            }
+        }
+
+        // Submit SMS Form (Insert)
+        async function submitSMSForm(event) {
+            event.preventDefault();
+            clearSMSAlerts();
+            showSMSLoading(true);
+
+            const formData = {
+                message_id: document.getElementById('sms_message_id').value,
+                general_campaign_name: document.getElementById('sms_general_campaign_name').value,
+                promotional_triggered: document.getElementById('sms_promotional_triggered').value,
+                source_id: document.getElementById('sms_source_id').value
+            };
+
+            try {
+                const response = await fetch('/api/submit_sms_campaign', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(formData)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    resetSMSForm();
+                    loadSMSMessageIds();
+                    showSMSAlert(result.message, 'success');
+                } else {
+                    showSMSAlert(result.error || 'Error submitting data', 'danger');
+                }
+            } catch (error) {
+                showSMSAlert('Error connecting to server: ' + error.message, 'danger');
+            }
+            showSMSLoading(false);
+        }
+
+        // Load SMS campaign data for update
+        async function loadSMSCampaignData() {
+            const messageId = document.getElementById('sms_update_message_id_input').value.trim();
+            if (!messageId) {
+                showSMSUpdateAlert('Please enter a Message ID', 'warning');
+                return;
+            }
+
+            showSMSLoading(true);
+            clearSMSUpdateAlerts();
+
+            try {
+                const response = await fetch(`/api/get_sms_campaign_data/${messageId}`, {
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    document.getElementById('sms_update_message_id').value = result.data.message_id;
+                    document.getElementById('sms_update_message_id_display').value = Math.floor(parseFloat(result.data.message_id));
+                    document.getElementById('sms_update_general_campaign_name').value = result.data.general_campaign_name || '';
+                    document.getElementById('sms_update_promotional_triggered').value = result.data.promotional_triggered || '';
+                    document.getElementById('sms_update_source_id').value = result.data.source_id || '';
+                    document.getElementById('smsUpdateCampaignForm').style.display = 'block';
+                } else if (result.success && !result.data) {
+                    showSMSUpdateAlert(`Message ID ${messageId} not found in the database`, 'warning');
+                    document.getElementById('smsUpdateCampaignForm').style.display = 'none';
+                } else {
+                    showSMSUpdateAlert(result.error || 'Error loading data', 'danger');
+                }
+            } catch (error) {
+                showSMSUpdateAlert('Error connecting to server: ' + error.message, 'danger');
+            }
+            showSMSLoading(false);
+        }
+
+        // Update SMS Form
+        async function updateSMSForm(event) {
+            event.preventDefault();
+            clearSMSUpdateAlerts();
+            showSMSLoading(true);
+
+            const formData = {
+                message_id: document.getElementById('sms_update_message_id').value,
+                general_campaign_name: document.getElementById('sms_update_general_campaign_name').value,
+                promotional_triggered: document.getElementById('sms_update_promotional_triggered').value,
+                source_id: document.getElementById('sms_update_source_id').value
+            };
+
+            try {
+                const response = await fetch('/api/update_sms_campaign', {
+                    method: 'PUT',
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(formData)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showSMSUpdateAlert(result.message, 'success');
+                } else {
+                    showSMSUpdateAlert(result.error || 'Error updating data', 'danger');
+                }
+            } catch (error) {
+                showSMSUpdateAlert('Error connecting to server: ' + error.message, 'danger');
+            }
+            showSMSLoading(false);
+        }
+
+        // Reset SMS Insert Form
+        function resetSMSForm() {
+            document.getElementById('smsCampaignForm').reset();
+            toggleSMSInsertFormFields(false);
+            clearSMSAlerts();
+        }
+
+        // Reset SMS Update Form
+        function resetSMSUpdateForm() {
+            document.getElementById('sms_update_message_id_input').value = '';
+            document.getElementById('smsUpdateCampaignForm').style.display = 'none';
+            clearSMSUpdateAlerts();
+        }
+
+        // SMS Alert functions
+        function showSMSAlert(message, type) {
+            const alertContainer = document.getElementById('smsAlertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            alertContainer.appendChild(alertDiv);
+            if (type === 'success') {
+                setTimeout(() => { if (alertDiv.parentNode) alertDiv.remove(); }, 5000);
+            }
+        }
+
+        function showSMSUpdateAlert(message, type) {
+            const alertContainer = document.getElementById('smsUpdateAlertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            alertContainer.appendChild(alertDiv);
+            if (type === 'success') {
+                setTimeout(() => { if (alertDiv.parentNode) alertDiv.remove(); }, 5000);
+            }
+        }
+
+        function clearSMSAlerts() {
+            document.getElementById('smsAlertContainer').innerHTML = '';
+        }
+
+        function clearSMSUpdateAlerts() {
+            document.getElementById('smsUpdateAlertContainer').innerHTML = '';
+        }
+
+        function showSMSLoading(show) {
+            document.getElementById('smsLoadingSpinner').style.display = show ? 'block' : 'none';
+        }
+
+        // Load all SMS campaign records
+        async function loadSMSCampaignRecords() {
+            console.warn('loadSMSCampaignRecords() START');
+            const loadingSpinner = document.getElementById('smsCampaignRecordsLoadingSpinner');
+            const tableContainer = document.getElementById('smsCampaignRecordsTableContainer');
+            const noRecordsMessage = document.getElementById('noSMSRecordsMessage');
+            const alertContainer = document.getElementById('smsCampaignRecordsAlertContainer');
+
+            if (!loadingSpinner || !tableContainer || !noRecordsMessage) {
+                console.error('SMS campaign records UI elements not found');
+                return;
+            }
+
+            alertContainer.innerHTML = '';
+            tableContainer.style.display = 'none';
+            noRecordsMessage.style.display = 'none';
+            loadingSpinner.style.display = 'block';
+
+            try {
+                const response = await fetch('/api/get_all_sms_campaign_data', {
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'}
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    if (result.data && result.data.length > 0) {
+                        const tableBody = document.getElementById('smsCampaignRecordsTableBody');
+                        tableBody.innerHTML = '';
+
+                        result.data.forEach(record => {
+                            const row = document.createElement('tr');
+                            const messageId = record.message_id ? Math.floor(parseFloat(record.message_id)) : '-';
+                            row.innerHTML = `
+                                <td><strong>${messageId}</strong></td>
+                                <td>${record.general_campaign_name || '-'}</td>
+                                <td>
+                                    <span class="badge ${record.promotional_triggered === 'TRIGGERED' ? 'bg-success' : 'bg-secondary'}">
+                                        ${record.promotional_triggered || '-'}
+                                    </span>
+                                </td>
+                                <td>${record.source_id || '-'}</td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+
+                        const recordCountEl = document.getElementById('smsRecordCount');
+                        if (recordCountEl) {
+                            recordCountEl.textContent = result.count;
+                        }
+
+                        tableContainer.style.display = 'block';
+                        loadingSpinner.style.display = 'none';
+                    } else {
+                        noRecordsMessage.style.display = 'block';
+                        loadingSpinner.style.display = 'none';
+                    }
+                } else {
+                    throw new Error(result.error || 'Failed to fetch SMS campaign records');
+                }
+            } catch (error) {
+                console.error('loadSMSCampaignRecords ERROR:', error);
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    <strong>Error:</strong> ${error.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                alertContainer.appendChild(alertDiv);
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // ============================================
         // INITIALIZATION - RUN AFTER ALL FUNCTIONS DEFINED
         // ============================================
         console.warn('=== SCRIPT LOADED, WAITING FOR DOM ===');
@@ -1830,6 +2354,10 @@
                 loadCampaignRecords();
                 console.error('DEBUG: About to call loadWunderkindCampaignRecords()');
                 loadWunderkindCampaignRecords();
+                console.error('DEBUG: About to call loadSMSMessageIds()');
+                loadSMSMessageIds();
+                console.error('DEBUG: About to call loadSMSCampaignRecords()');
+                loadSMSCampaignRecords();
                 console.warn('✓ Initial data load started');
             } catch (error) {
                 console.error('❌ Error during initialization:', error);
@@ -1864,6 +2392,22 @@
             if (wunderkindRecordsTab) {
                 wunderkindRecordsTab.addEventListener('shown.bs.tab', function() {
                     loadWunderkindCampaignRecords();
+                });
+            }
+
+            const smsTab = document.getElementById('sms-tab');
+            if (smsTab) {
+                smsTab.addEventListener('shown.bs.tab', function() {
+                    resetSMSForm();
+                    resetSMSUpdateForm();
+                    loadSMSMessageIds();
+                });
+            }
+
+            const smsRecordsTab = document.getElementById('sms-records-tab');
+            if (smsRecordsTab) {
+                smsRecordsTab.addEventListener('shown.bs.tab', function() {
+                    loadSMSCampaignRecords();
                 });
             }
 
