@@ -415,10 +415,14 @@ def get_wunderkind_campaign_ids():
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
         query = """
-            SELECT DISTINCT ISSUE_KEY AS campaign_id 
-            FROM LPDATAMART.TBL_D_ISSUE 
-            WHERE GENERAL_CAMPAIGN_NAME IS NULL 
+            SELECT DISTINCT ISSUE_KEY AS campaign_id
+            FROM LPDATAMART.TBL_D_ISSUE a
+            WHERE GENERAL_CAMPAIGN_NAME IS NULL
             AND SOURCE='WUNDERKIND'
+            AND NOT EXISTS(
+                SELECT 1 FROM REPORTS.TBL_WUNDERKIND_CAMPAIGN_DATA b
+                WHERE a.ISSUE_KEY = CAST(CAST(b.CAMPAIGN_ID AS BIGINT) AS VARCHAR)
+            )
             ORDER BY ISSUE_KEY
         """
         
