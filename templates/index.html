@@ -1,0 +1,1892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign Data Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+            position: relative;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .user-info {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .user-info strong {
+            color: #667eea;
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+            color: white;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .form-section {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-control:disabled, .form-select:disabled {
+            background-color: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
+        }
+        
+        .btn-success:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        .btn-outline-primary.active {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        .btn-outline-success {
+            border: 2px solid #27ae60;
+            color: #27ae60;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-success:hover {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .btn-outline-success.active {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .alert {
+            margin-top: 20px;
+            border-radius: 10px;
+            border: none;
+            padding: 15px 20px;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 5px solid #f5c6cb;
+        }
+        
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border-left: 5px solid #17a2b8;
+        }
+        
+        .nav-tabs {
+            flex-wrap: nowrap;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav-item {
+            flex: 1;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: #666 !important;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            padding: 10px 8px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .nav-link.active {
+            font-weight: 700 !important;
+            color: #667eea !important;
+            border-bottom: 3px solid #667eea !important;
+        }
+        
+        .platform-indicator {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .derived-field {
+            background: linear-gradient(135deg, #e8f4f8 0%, #f0e8f8 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .derived-field h6 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .derived-field p {
+            color: #555;
+            margin-bottom: 10px;
+        }
+        
+        .mode-selector {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .mode-selector .btn {
+            flex: 1;
+            padding: 15px;
+            font-size: 1.05rem;
+            border-radius: 8px;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #fff9e6 100%);
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            font-weight: 500;
+            color: #856404;
+        }
+        
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 40px 0;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .spinner-border {
+            color: #667eea;
+            border-width: 3px;
+        }
+        
+        .loading p {
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <div class="header-top">
+                <div class="user-info">
+                    👤 Logged in as <strong>{{ username }}</strong>
+                </div>
+                <a href="{{ url_for('logout') }}" class="logout-btn">🚪 Logout</a>
+            </div>
+            <h1><i class="bi bi-clipboard-data"></i> Campaign Data Management</h1>
+            <p>Manage campaign data for Bluecore and Wunderkind</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs mb-4" id="campaignTabs" role="tablist" style="border-bottom: 3px solid #667eea;">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="bluecore-tab" data-bs-toggle="tab" data-bs-target="#bluecore-content" type="button" role="tab">
+                    <i class="bi bi-lightning-fill"></i> Bluecore Email Data
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="wunderkind-tab" data-bs-toggle="tab" data-bs-target="#wunderkind-content" type="button" role="tab">
+                    <i class="bi bi-star-fill"></i> Wunderkind Email Data
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="campaign-records-tab" data-bs-toggle="tab" data-bs-target="#campaign-records-content" type="button" role="tab">
+                    <i class="bi bi-table"></i> Bluecore Campaign Records
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="wunderkind-campaign-records-tab" data-bs-toggle="tab" data-bs-target="#wunderkind-campaign-records-content" type="button" role="tab">
+                    <i class="bi bi-table"></i> Wunderkind Campaign Data
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="campaignTabContent">
+            <!-- Bluecore Tab -->
+            <div class="tab-pane fade show active" id="bluecore-content" role="tabpanel">
+
+        <!-- Platform Indicator -->
+        <div class="platform-indicator">
+            <i class="bi bi-lightning-fill"></i> Bluecore Email Data
+        </div>
+
+        <!-- Mode Selector -->
+        <div class="mode-selector">
+            <div class="btn-group w-100" role="group">
+                <button type="button" class="btn btn-outline-primary active" id="insertModeBtn" onclick="switchMode('insert')">
+                    <i class="bi bi-plus-circle"></i> Insert New Campaign
+                </button>
+                <button type="button" class="btn btn-outline-success" id="updateModeBtn" onclick="switchMode('update')">
+                    <i class="bi bi-pencil-square"></i> Update Existing Campaign
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="loading" id="loadingSpinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Processing...</p>
+        </div>
+
+        <!-- Insert Mode Form -->
+        <div id="insertForm">
+            <div class="info-box">
+                <strong><i class="bi bi-info-circle"></i> Insert Mode:</strong> 
+                Select a BC_ID that doesn't have campaign data yet, then fill in the details.
+            </div>
+
+            <form id="campaignForm" onsubmit="submitForm(event)">
+                <div class="form-section">
+                    <label for="bc_id" class="form-label required">BC_ID</label>
+                    <select class="form-select" id="bc_id" required>
+                        <option value="">Loading BC_IDs...</option>
+                    </select>
+                    <small class="form-text text-muted">Select a BC_ID from available campaigns without data</small>
+                </div>
+
+                <div class="form-section">
+                    <label for="deployment_date" class="form-label required">Deployment Date</label>
+                    <input type="date" class="form-control" id="deployment_date" required disabled>
+                </div>
+
+                <div class="form-section">
+                    <label for="general_campaign_name" class="form-label required">General Campaign Name</label>
+                    <input type="text" class="form-control" id="general_campaign_name" 
+                           placeholder="Enter campaign name" required disabled>
+                </div>
+
+                <div class="form-section">
+                    <label for="email_type" class="form-label">Email Type</label>
+                    <input type="text" class="form-control" id="email_type" 
+                           placeholder="Enter email type (optional)" disabled>
+                </div>
+
+                <div class="form-section">
+                    <label for="promotional_triggered" class="form-label required">Promotional Triggered</label>
+                    <select class="form-select" id="promotional_triggered" required disabled>
+                        <option value="">-- Select --</option>
+                        <option value="TRIGGERED">TRIGGERED</option>
+                        <option value="NON_TRIGGERED">NON_TRIGGERED</option>
+                    </select>
+                </div>
+
+                <div class="form-section">
+                    <label for="source_id" class="form-label required">Source ID</label>
+                    <input type="text" class="form-control" id="source_id" 
+                           placeholder="Enter source ID (must start with 'ec' or 'ep')" 
+                           required onchange="updateDerivedFields()" disabled>
+                    <small class="form-text text-muted">Must start with 'ec' (Consumer) or 'ep' (Pro)</small>
+                </div>
+
+                <div class="derived-field" id="derivedFields" style="display: none;">
+                    <h6><i class="bi bi-gear"></i> Auto-derived Fields:</h6>
+                    <p class="mb-1"><strong>Campaign Type:</strong> <span id="derivedCampaignType">-</span></p>
+                    <p class="mb-0"><strong>Source Flag:</strong> <span id="derivedSourceFlag">-</span></p>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle"></i> Submit Campaign Data
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                        <i class="bi bi-arrow-clockwise"></i> Reset Form
+                    </button>
+                </div>
+                
+                <!-- Alert Messages for Insert Form -->
+                <div id="alertContainer" style="margin-top: 20px;"></div>
+            </form>
+        </div>
+
+        <!-- Update Mode Form -->
+        <div id="updateForm" style="display: none;">
+            <div class="info-box">
+                <strong><i class="bi bi-info-circle"></i> Update Mode:</strong> 
+                Enter a BC_ID to load existing data, modify the fields, and update.
+            </div>
+
+            <div class="form-section">
+                <label for="update_bc_id_input" class="form-label required">Enter BC_ID to Update</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="update_bc_id_input" 
+                           placeholder="Enter BC_ID" required>
+                    <button class="btn btn-outline-primary" type="button" onclick="loadCampaignData()">
+                        <i class="bi bi-search"></i> Load Data
+                    </button>
+                </div>
+            </div>
+
+            <form id="updateCampaignForm" onsubmit="updateForm(event)" style="display: none;">
+                <input type="hidden" id="update_bc_id">
+
+                <div class="form-section">
+                    <label class="form-label">BC_ID (Read-only)</label>
+                    <input type="text" class="form-control" id="update_bc_id_display" disabled>
+                </div>
+
+                <div class="form-section">
+                    <label for="update_deployment_date" class="form-label required">Deployment Date</label>
+                    <input type="date" class="form-control" id="update_deployment_date" required>
+                </div>
+
+                <div class="form-section">
+                    <label for="update_general_campaign_name" class="form-label required">General Campaign Name</label>
+                    <input type="text" class="form-control" id="update_general_campaign_name" 
+                           placeholder="Enter campaign name" required>
+                </div>
+
+                <div class="form-section">
+                    <label for="update_email_type" class="form-label">Email Type</label>
+                    <input type="text" class="form-control" id="update_email_type" 
+                           placeholder="Enter email type (optional)">
+                </div>
+
+                <div class="form-section">
+                    <label for="update_promotional_triggered" class="form-label required">Promotional Triggered</label>
+                    <select class="form-select" id="update_promotional_triggered" required>
+                        <option value="">-- Select --</option>
+                        <option value="TRIGGERED">TRIGGERED</option>
+                        <option value="NON_TRIGGERED">NON_TRIGGERED</option>
+                    </select>
+                </div>
+
+                <div class="form-section">
+                    <label for="update_source_id" class="form-label required">Source ID</label>
+                    <input type="text" class="form-control" id="update_source_id" 
+                           placeholder="Enter source ID (must start with 'ec' or 'ep')" 
+                           required onchange="updateDerivedFieldsUpdate()">
+                    <small class="form-text text-muted">Must start with 'ec' (Consumer) or 'ep' (Pro)</small>
+                </div>
+
+                <div class="derived-field" id="updateDerivedFields" style="display: none;">
+                    <h6><i class="bi bi-gear"></i> Auto-derived Fields:</h6>
+                    <p class="mb-1"><strong>Campaign Type:</strong> <span id="updateDerivedCampaignType">-</span></p>
+                    <p class="mb-0"><strong>Source Flag:</strong> <span id="updateDerivedSourceFlag">-</span></p>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-circle"></i> Update Campaign Data
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetUpdateForm()">
+                        <i class="bi bi-arrow-clockwise"></i> Reset Form
+                    </button>
+                </div>
+                
+                <!-- Alert Messages for Update Form -->
+                <div id="alertContainer" style="margin-top: 20px;"></div>
+            </form>
+        </div>
+            </div>
+            <!-- End Bluecore Tab -->
+
+            <!-- Wunderkind Tab -->
+            <div class="tab-pane fade" id="wunderkind-content" role="tabpanel">
+
+        <!-- Platform Indicator -->
+        <div class="platform-indicator">
+            <i class="bi bi-star-fill"></i> Wunderkind Email Data
+        </div>
+
+        <!-- Mode Selector -->
+        <div class="mode-selector">
+            <div class="btn-group w-100" role="group">
+                <button type="button" class="btn btn-outline-primary active" id="wunderkindInsertModeBtn" onclick="switchWunderkindMode('insert')">
+                    <i class="bi bi-plus-circle"></i> Insert New Campaign
+                </button>
+                <button type="button" class="btn btn-outline-success" id="wunderkindUpdateModeBtn" onclick="switchWunderkindMode('update')">
+                    <i class="bi bi-pencil-square"></i> Update Existing Campaign
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="loading" id="wunderkindLoadingSpinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Processing...</p>
+        </div>
+
+        <!-- Insert Mode Form -->
+        <div id="wunderkindInsertForm">
+            <div class="info-box">
+                <strong><i class="bi bi-info-circle"></i> Insert Mode:</strong> 
+                Select a CAMPAIGN_ID that doesn't have campaign data yet, then fill in the details.
+            </div>
+
+            <form id="wunderkindCampaignForm" onsubmit="submitWunderkindForm(event)">
+                <div class="form-section">
+                    <label for="wunderkind_campaign_id" class="form-label required">Campaign ID</label>
+                    <select class="form-select" id="wunderkind_campaign_id" required onchange="fetchWunderkindCampaignName()">
+                        <option value="">Loading Campaign IDs...</option>
+                    </select>
+                    <small class="form-text text-muted">Select a Campaign ID from available campaigns without data</small>
+                </div>
+
+                <div class="form-section">
+                    <label class="form-label">Source CAMPAIGN_NAME</label>
+                    <div class="alert alert-info" id="wunderkind_campaign_name_display" style="margin: 0; padding: 12px;">
+                        <i class="bi bi-info-circle"></i> <span id="wunderkind_campaign_name_text">No Campaign ID selected</span>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <label for="wunderkind_general_campaign_name" class="form-label required">General Campaign Name</label>
+                    <input type="text" class="form-control" id="wunderkind_general_campaign_name" 
+                           placeholder="Enter campaign name" required disabled>
+                </div>
+
+                <div class="form-section">
+                    <label for="wunderkind_email_type" class="form-label">Email Type</label>
+                    <input type="text" class="form-control" id="wunderkind_email_type" 
+                           placeholder="Enter email type (optional)" disabled>
+                </div>
+
+                <div class="form-section">
+                    <label for="wunderkind_promotional_triggered" class="form-label required">Promotional Triggered</label>
+                    <select class="form-select" id="wunderkind_promotional_triggered" required disabled>
+                        <option value="">-- Select --</option>
+                        <option value="TRIGGERED">TRIGGERED</option>
+                        <option value="NON_TRIGGERED">NON_TRIGGERED</option>
+                    </select>
+                </div>
+
+                <div class="form-section">
+                    <label for="wunderkind_source_id" class="form-label required">Source ID</label>
+                    <input type="text" class="form-control" id="wunderkind_source_id" 
+                           placeholder="Enter source ID (must start with 'ec' or 'ep')" 
+                           required onchange="updateWunderkindDerivedFields()" disabled>
+                    <small class="form-text text-muted">Must start with 'ec' (Consumer) or 'ep' (Pro)</small>
+                </div>
+
+                <div class="derived-field" id="wunderkindDerivedFields" style="display: none;">
+                    <h6><i class="bi bi-gear"></i> Auto-derived Fields:</h6>
+                    <p class="mb-1"><strong>Campaign Type:</strong> <span id="wunderkindDerivedCampaignType">-</span></p>
+                    <p class="mb-0"><strong>Source Flag:</strong> <span id="wunderkindDerivedSourceFlag">-</span></p>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle"></i> Submit Campaign Data
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetWunderkindForm()">
+                        <i class="bi bi-arrow-clockwise"></i> Reset Form
+                    </button>
+                </div>
+                
+                <!-- Alert Messages for Wunderkind Insert Form -->
+                <div id="wunderkindAlertContainer" style="margin-top: 20px;"></div>
+            </form>
+        </div>
+
+        <!-- Update Mode Form -->
+        <div id="wunderkindUpdateForm" style="display: none;">
+            <div class="info-box">
+                <strong><i class="bi bi-info-circle"></i> Update Mode:</strong> 
+                Enter a Campaign ID to load existing data, modify the fields, and update.
+            </div>
+
+            <div class="form-section">
+                <label for="wunderkind_update_campaign_id_input" class="form-label required">Enter Campaign ID to Update</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="wunderkind_update_campaign_id_input" 
+                           placeholder="Enter Campaign ID" required>
+                    <button class="btn btn-outline-primary" type="button" onclick="loadWunderkindCampaignData()">
+                        <i class="bi bi-search"></i> Load Data
+                    </button>
+                </div>
+            </div>
+
+            <form id="wunderkindUpdateCampaignForm" onsubmit="updateWunderkindForm(event)" style="display: none;">
+                <input type="hidden" id="wunderkind_update_campaign_id">
+
+                <div class="form-section">
+                    <label class="form-label">Campaign ID (Read-only)</label>
+                    <input type="text" class="form-control" id="wunderkind_update_campaign_id_display" disabled>
+                </div>
+
+                <div class="form-section">
+                    <label for="wunderkind_update_general_campaign_name" class="form-label required">General Campaign Name</label>
+                    <input type="text" class="form-control" id="wunderkind_update_general_campaign_name" 
+                           placeholder="Enter campaign name" required>
+                </div>
+
+                <div class="form-section">
+                    <label for="wunderkind_update_email_type" class="form-label">Email Type</label>
+                    <input type="text" class="form-control" id="wunderkind_update_email_type" 
+                           placeholder="Enter email type (optional)">
+                </div>
+
+                <div class="form-section">
+                    <label for="wunderkind_update_promotional_triggered" class="form-label required">Promotional Triggered</label>
+                    <select class="form-select" id="wunderkind_update_promotional_triggered" required>
+                        <option value="">-- Select --</option>
+                        <option value="TRIGGERED">TRIGGERED</option>
+                        <option value="NON_TRIGGERED">NON_TRIGGERED</option>
+                    </select>
+                </div>
+
+                <div class="form-section">
+                    <label for="wunderkind_update_source_id" class="form-label required">Source ID</label>
+                    <input type="text" class="form-control" id="wunderkind_update_source_id" 
+                           placeholder="Enter source ID (must start with 'ec' or 'ep')" 
+                           required onchange="updateWunderkindDerivedFieldsUpdate()">
+                    <small class="form-text text-muted">Must start with 'ec' (Consumer) or 'ep' (Pro)</small>
+                </div>
+
+                <div class="derived-field" id="wunderkindUpdateDerivedFields" style="display: none;">
+                    <h6><i class="bi bi-gear"></i> Auto-derived Fields:</h6>
+                    <p class="mb-1"><strong>Campaign Type:</strong> <span id="wunderkindUpdateDerivedCampaignType">-</span></p>
+                    <p class="mb-0"><strong>Source Flag:</strong> <span id="wunderkindUpdateDerivedSourceFlag">-</span></p>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-circle"></i> Update Campaign Data
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetWunderkindUpdateForm()">
+                        <i class="bi bi-arrow-clockwise"></i> Reset Form
+                    </button>
+                </div>
+                
+                <!-- Alert Messages for Wunderkind Update Form -->
+                <div id="wunderkindAlertContainer" style="margin-top: 20px;"></div>
+            </form>
+        </div>
+            </div>
+            <!-- End Wunderkind Tab -->
+
+            <!-- Campaign Records Tab -->
+            <div class="tab-pane fade" id="campaign-records-content" role="tabpanel">
+                <div class="platform-indicator">
+                    <i class="bi bi-table"></i> Bluecore Campaign Records
+                </div>
+
+                <div class="info-box">
+                    <strong><i class="bi bi-info-circle"></i> View Mode:</strong> 
+                    This tab displays all records from REPORTS.TBL_BLUECORE_CAMPAIGN_DATA
+                </div>
+
+                <!-- Loading Spinner -->
+                <div class="loading" id="campaignRecordsLoadingSpinner" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading campaign records...</p>
+                </div>
+
+                <!-- Alert Messages -->
+                <div id="campaignRecordsAlertContainer"></div>
+
+                <!-- Campaign Records Table -->
+                <div id="campaignRecordsTableContainer" style="display: none;">
+                    <div style="margin-bottom: 15px;">
+                        <strong>Total Records: <span id="recordCount">0</span></strong>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>BC_ID</th>
+                                    <th>Campaign Type</th>
+                                    <th>Source Flag</th>
+                                    <th>Deployment Date</th>
+                                    <th>General Campaign Name</th>
+                                    <th>Email Type</th>
+                                    <th>Promotional Triggered</th>
+                                    <th>Source ID</th>
+                                </tr>
+                            </thead>
+                            <tbody id="campaignRecordsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- No Records Message -->
+                <div id="noRecordsMessage" style="display: none;" class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No campaign records found.
+                </div>
+            </div>
+            <!-- End Campaign Records Tab -->
+
+            <!-- Wunderkind Campaign Data Tab -->
+            <div class="tab-pane fade" id="wunderkind-campaign-records-content" role="tabpanel">
+                <div class="platform-indicator">
+                    <i class="bi bi-star-fill"></i> Wunderkind Campaign Data
+                </div>
+
+                <div class="info-box">
+                    <strong><i class="bi bi-info-circle"></i> View Mode:</strong> 
+                    This tab displays all records from REPORTS.TBL_WUNDERKIND_CAMPAIGN_DATA
+                </div>
+
+                <!-- Loading Spinner -->
+                <div class="loading" id="wunderkindCampaignRecordsLoadingSpinner" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading Wunderkind campaign records...</p>
+                </div>
+
+                <!-- Alert Messages -->
+                <div id="wunderkindCampaignRecordsAlertContainer"></div>
+
+                <!-- Wunderkind Campaign Records Table -->
+                <div id="wunderkindCampaignRecordsTableContainer" style="display: none;">
+                    <div style="margin-bottom: 15px;">
+                        <strong>Total Records: <span id="wunderkindRecordCount">0</span></strong>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Campaign ID</th>
+                                    <th>Campaign Type</th>
+                                    <th>Source Flag</th>
+                                    <th>General Campaign Name</th>
+                                    <th>Email Type</th>
+                                    <th>Promotional Triggered</th>
+                                    <th>Source ID</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wunderkindCampaignRecordsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- No Records Message -->
+                <div id="noWunderkindRecordsMessage" style="display: none;" class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No Wunderkind campaign records found.
+                </div>
+            </div>
+            <!-- End Wunderkind Campaign Data Tab -->
+        </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // All functions will be defined below, then initialization happens at the end
+
+        // Switch between Insert and Update modes
+        function switchMode(mode) {
+            const insertForm = document.getElementById('insertForm');
+            const updateForm = document.getElementById('updateForm');
+            const insertBtn = document.getElementById('insertModeBtn');
+            const updateBtn = document.getElementById('updateModeBtn');
+            
+            if (mode === 'insert') {
+                insertForm.style.display = 'block';
+                updateForm.style.display = 'none';
+                insertBtn.classList.add('active');
+                updateBtn.classList.remove('active');
+                resetUpdateForm();
+            } else {
+                insertForm.style.display = 'none';
+                updateForm.style.display = 'block';
+                insertBtn.classList.remove('active');
+                updateBtn.classList.add('active');
+                resetForm();
+            }
+            clearAlerts();
+        }
+
+        // Utility function to format date as DD-MM-YYYY
+        function formatDateDDMMYYYY(dateString) {
+            if (!dateString) return '-';
+            try {
+                const date = new Date(dateString);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}-${month}-${year}`;
+            } catch (error) {
+                return dateString;
+            }
+        }
+
+        // Load BC_IDs from database
+        async function loadBCIds() {
+            console.warn('📥 loadBCIds() START');
+            console.error('DEBUG: loadBCIds - timestamp:', new Date().toISOString());
+            
+            const select = document.getElementById('bc_id');
+            console.error('DEBUG: loadBCIds - select element found?', !!select);
+            if (!select) {
+                console.error('❌ bc_id select element NOT found!');
+                return;
+            }
+            
+            select.innerHTML = '<option value="">⏳ Loading...</option>';
+            select.disabled = true;
+            
+            try {
+                console.error('DEBUG: loadBCIds - Fetching /api/get_bc_ids...');
+                const response = await fetch('/api/get_bc_ids', {
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                
+                console.error('  DEBUG: Response received, status:', response.status);
+                console.log('  ← Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.error('  DEBUG: API result:', result.success ? `${result.data.length} records` : 'ERROR', result);
+                console.log('  ← API returned:', result.success ? `${result.data.length} records` : 'ERROR');
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    console.error('DEBUG: Populating dropdown with', result.data.length, 'items');
+                    select.innerHTML = '<option value="">-- Select BC_ID --</option>';
+                    result.data.forEach(bc_id => {
+                        const option = document.createElement('option');
+                        option.value = bc_id;
+                        option.textContent = bc_id;
+                        select.appendChild(option);
+                    });
+                    select.disabled = false;
+                    console.warn(`✓ loadBCIds COMPLETE: ${result.data.length} items loaded`);
+                } else {
+                    select.innerHTML = '<option value="">No BC_IDs available</option>';
+                    select.disabled = false;
+                    console.warn('⚠ loadBCIds: No data returned');
+                }
+                
+                // Add change event listener
+                select.addEventListener('change', function() {
+                    toggleInsertFormFields(this.value !== '');
+                });
+                
+            } catch (error) {
+                console.error('❌ loadBCIds ERROR:', error);
+                select.innerHTML = '<option value="">Error loading BC_IDs</option>';
+                select.disabled = false;
+                showAlert('Error loading BC_IDs: ' + error.message, 'danger');
+            }
+        }
+
+        // Toggle insert form fields enable/disable
+        function toggleInsertFormFields(enable) {
+            const fields = ['deployment_date', 'general_campaign_name', 'email_type', 'promotional_triggered', 'source_id'];
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.disabled = !enable;
+                    if (!enable) {
+                        field.value = '';
+                    }
+                }
+            });
+            
+            if (!enable) {
+                document.getElementById('derivedFields').style.display = 'none';
+            }
+        }
+
+        // Update derived fields based on Source_ID
+        function updateDerivedFields() {
+            const sourceId = document.getElementById('source_id').value;
+            const derivedFields = document.getElementById('derivedFields');
+            const campaignType = document.getElementById('derivedCampaignType');
+            const sourceFlag = document.getElementById('derivedSourceFlag');
+            
+            if (sourceId.length >= 2) {
+                const prefix = sourceId.substring(0, 2).toLowerCase();
+                
+                if (prefix === 'ec') {
+                    campaignType.textContent = 'Consumer';
+                    sourceFlag.textContent = 'ec';
+                    derivedFields.style.display = 'block';
+                } else if (prefix === 'ep') {
+                    campaignType.textContent = 'Pro';
+                    sourceFlag.textContent = 'ep';
+                    derivedFields.style.display = 'block';
+                } else {
+                    campaignType.textContent = 'Invalid (must start with ec or ep)';
+                    sourceFlag.textContent = 'Invalid';
+                    derivedFields.style.display = 'block';
+                }
+            } else {
+                derivedFields.style.display = 'none';
+            }
+        }
+
+        // Update derived fields for update form
+        function updateDerivedFieldsUpdate() {
+            const sourceId = document.getElementById('update_source_id').value;
+            const derivedFields = document.getElementById('updateDerivedFields');
+            const campaignType = document.getElementById('updateDerivedCampaignType');
+            const sourceFlag = document.getElementById('updateDerivedSourceFlag');
+            
+            if (sourceId.length >= 2) {
+                const prefix = sourceId.substring(0, 2).toLowerCase();
+                
+                if (prefix === 'ec') {
+                    campaignType.textContent = 'Consumer';
+                    sourceFlag.textContent = 'ec';
+                    derivedFields.style.display = 'block';
+                } else if (prefix === 'ep') {
+                    campaignType.textContent = 'Pro';
+                    sourceFlag.textContent = 'ep';
+                    derivedFields.style.display = 'block';
+                } else {
+                    campaignType.textContent = 'Invalid (must start with ec or ep)';
+                    sourceFlag.textContent = 'Invalid';
+                    derivedFields.style.display = 'block';
+                }
+            } else {
+                derivedFields.style.display = 'none';
+            }
+        }
+
+        // Submit new campaign
+        async function submitForm(event) {
+            event.preventDefault();
+            
+            const formData = {
+                bc_id: document.getElementById('bc_id').value,
+                deployment_date: document.getElementById('deployment_date').value,
+                general_campaign_name: document.getElementById('general_campaign_name').value,
+                email_type: document.getElementById('email_type').value || null,
+                promotional_triggered: document.getElementById('promotional_triggered').value,
+                source_id: document.getElementById('source_id').value
+            };
+            
+            // Validate Source_ID
+            const prefix = formData.source_id.substring(0, 2).toLowerCase();
+            if (prefix !== 'ec' && prefix !== 'ep') {
+                showAlert('Source_ID must start with "ec" or "ep"', 'danger');
+                return;
+            }
+            
+            showLoading(true);
+            clearAlerts();
+            
+            try {
+                const response = await fetch('/api/submit_campaign', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const message = `Insert BC_ID-${formData.bc_id}: "${formData.general_campaign_name}" - ${formData.deployment_date}`;
+                    showAlert(message, 'success');
+                    resetForm();
+                    loadBCIds(); // Reload BC_IDs to update the list
+                } else {
+                    showAlert('Error: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error submitting form: ' + error.message, 'danger');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Load campaign data for update
+        async function loadCampaignData() {
+            const bcId = document.getElementById('update_bc_id_input').value.trim();
+            
+            if (!bcId) {
+                showAlert('Please enter a BC_ID', 'warning');
+                return;
+            }
+            
+            showLoading(true);
+            clearAlerts();
+            
+            try {
+                const response = await fetch(`/api/get_campaign_data/${encodeURIComponent(bcId)}`, {
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    // Populate form fields
+                    document.getElementById('update_bc_id').value = result.data.bc_id;
+                    document.getElementById('update_bc_id_display').value = result.data.bc_id;
+                    document.getElementById('update_deployment_date').value = result.data.deployment_date;
+                    document.getElementById('update_general_campaign_name').value = result.data.general_campaign_name;
+                    document.getElementById('update_email_type').value = result.data.email_type;
+                    document.getElementById('update_promotional_triggered').value = result.data.promotional_triggered;
+                    document.getElementById('update_source_id').value = result.data.source_id;
+                    
+                    // Show the form and update derived fields
+                    document.getElementById('updateCampaignForm').style.display = 'block';
+                    updateDerivedFieldsUpdate();
+                    
+                    showAlert('Campaign data loaded successfully!', 'info');
+                } else if (result.success && !result.data) {
+                    showAlert(`No campaign data found for BC_ID: ${bcId}`, 'warning');
+                    document.getElementById('updateCampaignForm').style.display = 'none';
+                } else {
+                    showAlert('Error: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error loading campaign data: ' + error.message, 'danger');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Update campaign
+        async function updateForm(event) {
+            event.preventDefault();
+            
+            const formData = {
+                bc_id: document.getElementById('update_bc_id').value,
+                deployment_date: document.getElementById('update_deployment_date').value,
+                general_campaign_name: document.getElementById('update_general_campaign_name').value,
+                email_type: document.getElementById('update_email_type').value || null,
+                promotional_triggered: document.getElementById('update_promotional_triggered').value,
+                source_id: document.getElementById('update_source_id').value
+            };
+            
+            // Validate Source_ID
+            const prefix = formData.source_id.substring(0, 2).toLowerCase();
+            if (prefix !== 'ec' && prefix !== 'ep') {
+                showAlert('Source_ID must start with "ec" or "ep"', 'danger');
+                return;
+            }
+            
+            showLoading(true);
+            clearAlerts();
+            
+            try {
+                const response = await fetch('/api/update_campaign', {
+                    method: 'PUT',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const message = `Update BC_ID-${formData.bc_id}: "${formData.general_campaign_name}" - ${formData.deployment_date}`;
+                    showAlert(message, 'success');
+                    resetUpdateForm();
+                } else {
+                    showAlert('Error: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error updating campaign: ' + error.message, 'danger');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Reset insert form
+        function resetForm() {
+            document.getElementById('campaignForm').reset();
+            document.getElementById('derivedFields').style.display = 'none';
+            toggleInsertFormFields(false);
+        }
+
+        // Reset update form
+        function resetUpdateForm() {
+            document.getElementById('update_bc_id_input').value = '';
+            document.getElementById('updateCampaignForm').reset();
+            document.getElementById('updateCampaignForm').style.display = 'none';
+            document.getElementById('updateDerivedFields').style.display = 'none';
+        }
+
+        // Show alert message
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds for success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
+            }
+        }
+
+        // Clear all alerts
+        function clearAlerts() {
+            document.getElementById('alertContainer').innerHTML = '';
+        }
+
+        // Show/hide loading spinner
+        function showLoading(show) {
+            document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+        }
+
+        // ============================================
+        // WUNDERKIND FUNCTIONS
+        // ============================================
+
+        // Load Campaign IDs for Wunderkind
+        async function loadWunderkindCampaignIds() {
+            console.warn('📥 loadWunderkindCampaignIds() START');
+            
+            const select = document.getElementById('wunderkind_campaign_id');
+            if (!select) {
+                console.error('❌ wunderkind_campaign_id select element NOT found!');
+                return;
+            }
+            
+            select.innerHTML = '<option value="">⏳ Loading...</option>';
+            select.disabled = true;
+            
+            try {
+                console.log('  → Fetching /api/get_wunderkind_campaign_ids...');
+                const response = await fetch('/api/get_wunderkind_campaign_ids', {
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                
+                console.log('  ← Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('  ← API returned:', result.success ? `${result.data.length} records` : 'ERROR');
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    select.innerHTML = '<option value="">-- Select Campaign ID --</option>';
+                    result.data.forEach(campaign_id => {
+                        const option = document.createElement('option');
+                        option.value = campaign_id;
+                        option.textContent = campaign_id;
+                        select.appendChild(option);
+                    });
+                    select.disabled = false;
+                    console.warn(`✓ loadWunderkindCampaignIds COMPLETE: ${result.data.length} items loaded`);
+                } else {
+                    select.innerHTML = '<option value="">No Campaign IDs available</option>';
+                    select.disabled = false;
+                    console.warn('⚠ loadWunderkindCampaignIds: No data returned');
+                }
+                
+                // Add change event listener
+                select.addEventListener('change', function() {
+                    toggleWunderkindInsertFormFields(this.value !== '');
+                });
+                
+            } catch (error) {
+                console.error('❌ loadWunderkindCampaignIds ERROR:', error);
+                select.innerHTML = '<option value="">Error loading Campaign IDs</option>';
+                select.disabled = false;
+                showWunderkindAlert('Error loading Campaign IDs: ' + error.message, 'danger');
+            }
+        }
+
+        // Toggle Wunderkind insert form fields enable/disable
+        function toggleWunderkindInsertFormFields(enable) {
+            const fields = ['wunderkind_general_campaign_name', 'wunderkind_email_type', 'wunderkind_promotional_triggered', 'wunderkind_source_id'];
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.disabled = !enable;
+                    if (!enable) {
+                        field.value = '';
+                    }
+                }
+            });
+            
+            if (!enable) {
+                document.getElementById('wunderkindDerivedFields').style.display = 'none';
+                document.getElementById('wunderkind_campaign_name_text').textContent = 'No Campaign ID selected';
+            }
+        }
+
+        // Fetch Wunderkind Campaign Name from source table
+        async function fetchWunderkindCampaignName() {
+            const campaignId = document.getElementById('wunderkind_campaign_id').value;
+            const campaignNameText = document.getElementById('wunderkind_campaign_name_text');
+            
+            if (!campaignId) {
+                campaignNameText.textContent = 'No Campaign ID selected';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/get_wunderkind_campaign_name/${encodeURIComponent(campaignId)}`, {
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                const result = await response.json();
+                
+                if (result.success && result.campaign_name) {
+                    campaignNameText.textContent = result.campaign_name;
+                } else {
+                    campaignNameText.textContent = 'No campaign name found for this Campaign ID';
+                }
+            } catch (error) {
+                console.error('Error fetching campaign name:', error);
+                campaignNameText.textContent = 'Error loading campaign name';
+            }
+        }
+
+        // Switch between Wunderkind Insert and Update modes
+        function switchWunderkindMode(mode) {
+            const insertForm = document.getElementById('wunderkindInsertForm');
+            const updateForm = document.getElementById('wunderkindUpdateForm');
+            const insertBtn = document.getElementById('wunderkindInsertModeBtn');
+            const updateBtn = document.getElementById('wunderkindUpdateModeBtn');
+            
+            if (mode === 'insert') {
+                insertForm.style.display = 'block';
+                updateForm.style.display = 'none';
+                insertBtn.classList.add('active');
+                updateBtn.classList.remove('active');
+                resetWunderkindUpdateForm();
+            } else {
+                insertForm.style.display = 'none';
+                updateForm.style.display = 'block';
+                insertBtn.classList.remove('active');
+                updateBtn.classList.add('active');
+                resetWunderkindForm();
+            }
+            clearWunderkindAlerts();
+        }
+
+        // Update derived fields based on Source_ID for Wunderkind
+        function updateWunderkindDerivedFields() {
+            const sourceId = document.getElementById('wunderkind_source_id').value;
+            const derivedFields = document.getElementById('wunderkindDerivedFields');
+            const campaignType = document.getElementById('wunderkindDerivedCampaignType');
+            const sourceFlag = document.getElementById('wunderkindDerivedSourceFlag');
+            
+            if (sourceId.length >= 2) {
+                const prefix = sourceId.substring(0, 2).toLowerCase();
+                
+                if (prefix === 'ec') {
+                    campaignType.textContent = 'Consumer';
+                    sourceFlag.textContent = 'ec';
+                    derivedFields.style.display = 'block';
+                } else if (prefix === 'ep') {
+                    campaignType.textContent = 'Pro';
+                    sourceFlag.textContent = 'ep';
+                    derivedFields.style.display = 'block';
+                } else {
+                    campaignType.textContent = 'Invalid (must start with ec or ep)';
+                    sourceFlag.textContent = 'Invalid';
+                    derivedFields.style.display = 'block';
+                }
+            } else {
+                derivedFields.style.display = 'none';
+            }
+        }
+
+        // Update derived fields for Wunderkind update form
+        function updateWunderkindDerivedFieldsUpdate() {
+            const sourceId = document.getElementById('wunderkind_update_source_id').value;
+            const derivedFields = document.getElementById('wunderkindUpdateDerivedFields');
+            const campaignType = document.getElementById('wunderkindUpdateDerivedCampaignType');
+            const sourceFlag = document.getElementById('wunderkindUpdateDerivedSourceFlag');
+            
+            if (sourceId.length >= 2) {
+                const prefix = sourceId.substring(0, 2).toLowerCase();
+                
+                if (prefix === 'ec') {
+                    campaignType.textContent = 'Consumer';
+                    sourceFlag.textContent = 'ec';
+                    derivedFields.style.display = 'block';
+                } else if (prefix === 'ep') {
+                    campaignType.textContent = 'Pro';
+                    sourceFlag.textContent = 'ep';
+                    derivedFields.style.display = 'block';
+                } else {
+                    campaignType.textContent = 'Invalid (must start with ec or ep)';
+                    sourceFlag.textContent = 'Invalid';
+                    derivedFields.style.display = 'block';
+                }
+            } else {
+                derivedFields.style.display = 'none';
+            }
+        }
+
+        // Submit new Wunderkind campaign
+        async function submitWunderkindForm(event) {
+            event.preventDefault();
+            
+            const formData = {
+                campaign_id: document.getElementById('wunderkind_campaign_id').value,
+                general_campaign_name: document.getElementById('wunderkind_general_campaign_name').value,
+                email_type: document.getElementById('wunderkind_email_type').value || null,
+                promotional_triggered: document.getElementById('wunderkind_promotional_triggered').value,
+                source_id: document.getElementById('wunderkind_source_id').value
+            };
+            
+            // Validate Source_ID
+            const prefix = formData.source_id.substring(0, 2).toLowerCase();
+            if (prefix !== 'ec' && prefix !== 'ep') {
+                showWunderkindAlert('Source_ID must start with "ec" or "ep"', 'danger');
+                return;
+            }
+            
+            showWunderkindLoading(true);
+            clearWunderkindAlerts();
+            
+            try {
+                const response = await fetch('/api/submit_wunderkind_campaign', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const message = `Insert Campaign_ID-${formData.campaign_id}: "${formData.general_campaign_name}"`;
+                    showWunderkindAlert(message, 'success');
+                    resetWunderkindForm();
+                    loadWunderkindCampaignIds(); // Reload Campaign IDs to update the list
+                } else {
+                    showWunderkindAlert('Error: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showWunderkindAlert('Error submitting form: ' + error.message, 'danger');
+            } finally {
+                showWunderkindLoading(false);
+            }
+        }
+
+        // Load campaign data for Wunderkind update
+        async function loadWunderkindCampaignData() {
+            const campaignId = document.getElementById('wunderkind_update_campaign_id_input').value.trim();
+            
+            if (!campaignId) {
+                showWunderkindAlert('Please enter a Campaign ID', 'warning');
+                return;
+            }
+            
+            showWunderkindLoading(true);
+            clearWunderkindAlerts();
+            
+            try {
+                const response = await fetch(`/api/get_wunderkind_campaign_data/${encodeURIComponent(campaignId)}`, {
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    // Populate form fields
+                    document.getElementById('wunderkind_update_campaign_id').value = result.data.campaign_id;
+                    document.getElementById('wunderkind_update_campaign_id_display').value = result.data.campaign_id;
+                    document.getElementById('wunderkind_update_general_campaign_name').value = result.data.general_campaign_name;
+                    document.getElementById('wunderkind_update_email_type').value = result.data.email_type || '';
+                    document.getElementById('wunderkind_update_promotional_triggered').value = result.data.promotional_triggered;
+                    document.getElementById('wunderkind_update_source_id').value = result.data.source_id;
+                    
+                    // Show the form and update derived fields
+                    document.getElementById('wunderkindUpdateCampaignForm').style.display = 'block';
+                    updateWunderkindDerivedFieldsUpdate();
+                    
+                    showWunderkindAlert('Campaign data loaded successfully!', 'info');
+                } else if (result.success && !result.data) {
+                    showWunderkindAlert(`No campaign data found for Campaign ID: ${campaignId}`, 'warning');
+                    document.getElementById('wunderkindUpdateCampaignForm').style.display = 'none';
+                } else {
+                    showWunderkindAlert('Error: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showWunderkindAlert('Error loading campaign data: ' + error.message, 'danger');
+            } finally {
+                showWunderkindLoading(false);
+            }
+        }
+
+        // Update Wunderkind campaign
+        async function updateWunderkindForm(event) {
+            event.preventDefault();
+            
+            const formData = {
+                campaign_id: document.getElementById('wunderkind_update_campaign_id').value,
+                general_campaign_name: document.getElementById('wunderkind_update_general_campaign_name').value,
+                email_type: document.getElementById('wunderkind_update_email_type').value || null,
+                promotional_triggered: document.getElementById('wunderkind_update_promotional_triggered').value,
+                source_id: document.getElementById('wunderkind_update_source_id').value
+            };
+            
+            // Validate Source_ID
+            const prefix = formData.source_id.substring(0, 2).toLowerCase();
+            if (prefix !== 'ec' && prefix !== 'ep') {
+                showWunderkindAlert('Source_ID must start with "ec" or "ep"', 'danger');
+                return;
+            }
+            
+            showWunderkindLoading(true);
+            clearWunderkindAlerts();
+            
+            try {
+                const response = await fetch('/api/update_wunderkind_campaign', {
+                    method: 'PUT',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const message = `Update Campaign_ID-${formData.campaign_id}: "${formData.general_campaign_name}"`;
+                    showWunderkindAlert(message, 'success');
+                    resetWunderkindUpdateForm();
+                } else {
+                    showWunderkindAlert('Error: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showWunderkindAlert('Error updating campaign: ' + error.message, 'danger');
+            } finally {
+                showWunderkindLoading(false);
+            }
+        }
+
+        // Reset Wunderkind insert form
+        function resetWunderkindForm() {
+            document.getElementById('wunderkindCampaignForm').reset();
+            document.getElementById('wunderkindDerivedFields').style.display = 'none';
+            toggleWunderkindInsertFormFields(false);
+        }
+
+        // Reset Wunderkind update form
+        function resetWunderkindUpdateForm() {
+            document.getElementById('wunderkind_update_campaign_id_input').value = '';
+            document.getElementById('wunderkindUpdateCampaignForm').reset();
+            document.getElementById('wunderkindUpdateCampaignForm').style.display = 'none';
+            document.getElementById('wunderkindUpdateDerivedFields').style.display = 'none';
+        }
+
+        // Show Wunderkind alert message
+        function showWunderkindAlert(message, type) {
+            const alertContainer = document.getElementById('wunderkindAlertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds for success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
+            }
+        }
+
+        // Clear Wunderkind alerts
+        function clearWunderkindAlerts() {
+            document.getElementById('wunderkindAlertContainer').innerHTML = '';
+        }
+
+        // Show/hide Wunderkind loading spinner
+        function showWunderkindLoading(show) {
+            document.getElementById('wunderkindLoadingSpinner').style.display = show ? 'block' : 'none';
+        }
+
+        // ============================================
+        // CAMPAIGN RECORDS FUNCTIONS
+        // ============================================
+
+        // Load all Wunderkind campaign records
+        async function loadWunderkindCampaignRecords() {
+            console.warn('📥 loadWunderkindCampaignRecords() START');
+            const loadingSpinner = document.getElementById('wunderkindCampaignRecordsLoadingSpinner');
+            const tableContainer = document.getElementById('wunderkindCampaignRecordsTableContainer');
+            const noRecordsMessage = document.getElementById('noWunderkindRecordsMessage');
+            const alertContainer = document.getElementById('wunderkindCampaignRecordsAlertContainer');
+
+            if (!loadingSpinner || !tableContainer || !noRecordsMessage) {
+                console.error('❌ Wunderkind campaign records UI elements not found');
+                return;
+            }
+
+            // Clear previous state
+            alertContainer.innerHTML = '';
+            tableContainer.style.display = 'none';
+            noRecordsMessage.style.display = 'none';
+            loadingSpinner.style.display = 'block';
+
+            try {
+                console.log('  → Fetching /api/get_all_wunderkind_campaign_data...');
+                const response = await fetch('/api/get_all_wunderkind_campaign_data', {
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                console.log('  ← Response status:', response.status);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                console.log('  ← API returned:', result.success ? `${result.data.length} records` : 'ERROR');
+
+                if (result.success) {
+                    if (result.data && result.data.length > 0) {
+                        console.log('  → Populating table with ' + result.data.length + ' records');
+                        const tableBody = document.getElementById('wunderkindCampaignRecordsTableBody');
+                        if (!tableBody) {
+                            console.error('❌ Wunderkind campaign records table body not found');
+                            return;
+                        }
+                        tableBody.innerHTML = '';
+
+                        result.data.forEach(record => {
+                            const row = document.createElement('tr');
+                            // Format campaign_id to remove decimal places
+                            const campaignId = record.campaign_id ? Math.floor(parseFloat(record.campaign_id)) : '-';
+                            row.innerHTML = `
+                                <td><strong>${campaignId}</strong></td>
+                                <td>${record.campaign_type || '-'}</td>
+                                <td>${record.source_flag || '-'}</td>
+                                <td>${record.general_campaign_name || '-'}</td>
+                                <td>${record.email_type || '-'}</td>
+                                <td>
+                                    <span class="badge ${record.promotional_triggered === 'TRIGGERED' ? 'bg-success' : 'bg-secondary'}">
+                                        ${record.promotional_triggered || '-'}
+                                    </span>
+                                </td>
+                                <td>${record.source_id || '-'}</td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+
+                        // Show record count
+                        const recordCountEl = document.getElementById('wunderkindRecordCount');
+                        if (recordCountEl) {
+                            recordCountEl.textContent = result.count;
+                        }
+
+                        // Show table
+                        tableContainer.style.display = 'block';
+                        loadingSpinner.style.display = 'none';
+                        console.warn(`✓ loadWunderkindCampaignRecords COMPLETE: ${result.data.length} records displayed`);
+                    } else {
+                        console.warn('⚠ loadWunderkindCampaignRecords: No records found');
+                        noRecordsMessage.style.display = 'block';
+                        loadingSpinner.style.display = 'none';
+                    }
+                } else {
+                    throw new Error(result.error || 'Failed to fetch Wunderkind campaign records');
+                }
+            } catch (error) {
+                console.error('❌ loadWunderkindCampaignRecords ERROR:', error);
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    <strong>Error:</strong> ${error.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                alertContainer.appendChild(alertDiv);
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Load all campaign records
+        async function loadCampaignRecords() {
+            console.warn('📥 loadCampaignRecords() START');
+            const loadingSpinner = document.getElementById('campaignRecordsLoadingSpinner');
+            const tableContainer = document.getElementById('campaignRecordsTableContainer');
+            const noRecordsMessage = document.getElementById('noRecordsMessage');
+            const alertContainer = document.getElementById('campaignRecordsAlertContainer');
+            
+            if (!loadingSpinner || !tableContainer || !noRecordsMessage) {
+                console.error('❌ Campaign records UI elements not found');
+                return;
+            }
+            
+            // Clear previous state
+            alertContainer.innerHTML = '';
+            tableContainer.style.display = 'none';
+            noRecordsMessage.style.display = 'none';
+            loadingSpinner.style.display = 'block';
+            
+            try {
+                console.log('  → Fetching /api/get_all_campaign_data...');
+                const response = await fetch('/api/get_all_campaign_data', {
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                console.log('  ← Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('  ← API returned:', result.success ? `${result.data.length} records` : 'ERROR');
+                
+                if (result.success) {
+                    if (result.data && result.data.length > 0) {
+                        console.log('  → Populating table with ' + result.data.length + ' records');
+                        const tableBody = document.getElementById('campaignRecordsTableBody');
+                        if (!tableBody) {
+                            console.error('❌ Campaign records table body not found');
+                            return;
+                        }
+                        tableBody.innerHTML = '';
+                        
+                        result.data.forEach(record => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td><strong>${record.bc_id}</strong></td>
+                                <td>${record.campaign_type || '-'}</td>
+                                <td>${record.source_flag || '-'}</td>
+                                <td>${formatDateDDMMYYYY(record.deployment_date)}</td>
+                                <td>${record.general_campaign_name || '-'}</td>
+                                <td>${record.email_type || '-'}</td>
+                                <td>
+                                    <span class="badge ${record.promotional_triggered === 'TRIGGERED' ? 'bg-success' : 'bg-secondary'}">
+                                        ${record.promotional_triggered || '-'}
+                                    </span>
+                                </td>
+                                <td>${record.source_id || '-'}</td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+                        
+                        // Show record count
+                        const recordCountEl = document.getElementById('recordCount');
+                        if (recordCountEl) {
+                            recordCountEl.textContent = result.count;
+                        }
+                        
+                        // Show table
+                        tableContainer.style.display = 'block';
+                        loadingSpinner.style.display = 'none';
+                        console.warn(`✓ loadCampaignRecords COMPLETE: ${result.data.length} records displayed`);
+                    } else {
+                        console.warn('⚠ loadCampaignRecords: No records found');
+                        noRecordsMessage.style.display = 'block';
+                        loadingSpinner.style.display = 'none';
+                    }
+                } else {
+                    throw new Error(result.error || 'Failed to fetch campaign records');
+                }
+            } catch (error) {
+                console.error('❌ loadCampaignRecords ERROR:', error);
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    <strong>Error:</strong> ${error.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                alertContainer.appendChild(alertDiv);
+                loadingSpinner.style.display = 'none';
+            }
+        }
+        
+        // Back button prevention will be set up after initialization
+
+        // ============================================
+        // INITIALIZATION - RUN AFTER ALL FUNCTIONS DEFINED
+        // ============================================
+        console.warn('=== SCRIPT LOADED, WAITING FOR DOM ===');
+        console.error('DEBUG: Current time:', new Date().toISOString());
+        
+        function initializeApp() {
+            console.warn('✓ initializeApp() called at', new Date().toISOString());
+            console.error('DEBUG: initializeApp - document.readyState:', document.readyState);
+            
+            // Check for critical elements
+            const bcSelect = document.getElementById('bc_id');
+            console.error('DEBUG: bc_id element found?', !!bcSelect);
+            if (!bcSelect) {
+                console.error('❌ CRITICAL: bc_id element NOT found, retrying...');
+                setTimeout(initializeApp, 500);
+                return;
+            }
+            
+            console.warn('✓ DOM elements found');
+            console.error('DEBUG: Starting data load...');
+            
+            // Load all data
+            try {
+                console.error('DEBUG: About to call loadBCIds()');
+                loadBCIds();
+                console.error('DEBUG: About to call loadWunderkindCampaignIds()');
+                loadWunderkindCampaignIds();
+                console.error('DEBUG: About to call loadCampaignRecords()');
+                loadCampaignRecords();
+                console.error('DEBUG: About to call loadWunderkindCampaignRecords()');
+                loadWunderkindCampaignRecords();
+                console.warn('✓ Initial data load started');
+            } catch (error) {
+                console.error('❌ Error during initialization:', error);
+            }
+            
+            // Set up event listeners
+            const bcTab = document.getElementById('bluecore-tab');
+            if (bcTab) {
+                bcTab.addEventListener('shown.bs.tab', function() {
+                    resetForm();
+                    resetUpdateForm();
+                });
+            }
+            
+            const wkTab = document.getElementById('wunderkind-tab');
+            if (wkTab) {
+                wkTab.addEventListener('shown.bs.tab', function() {
+                    resetWunderkindForm();
+                    resetWunderkindUpdateForm();
+                    loadWunderkindCampaignIds();
+                });
+            }
+            
+            const recordsTab = document.getElementById('campaign-records-tab');
+            if (recordsTab) {
+                recordsTab.addEventListener('shown.bs.tab', function() {
+                    loadCampaignRecords();
+                });
+            }
+
+            const wunderkindRecordsTab = document.getElementById('wunderkind-campaign-records-tab');
+            if (wunderkindRecordsTab) {
+                wunderkindRecordsTab.addEventListener('shown.bs.tab', function() {
+                    loadWunderkindCampaignRecords();
+                });
+            }
+
+            console.warn('=== INITIALIZATION COMPLETE ===');
+        }
+        
+        // Start initialization when DOM is ready
+        console.warn('DOM readyState:', document.readyState);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            // DOM already loaded
+            setTimeout(initializeApp, 100);
+        }
+        
+        // Back button prevention setup
+        setTimeout(function() {
+            history.pushState(null, null, window.location.href);
+            window.addEventListener('popstate', function() {
+                window.location.href = '{{ url_for("login") }}';
+            });
+        }, 500);
+    </script>
+</body>
+</html>
+
