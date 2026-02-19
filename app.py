@@ -854,8 +854,12 @@ def get_sms_message_ids():
 
         query = """
             SELECT DISTINCT MESSAGE_ID AS message_id
-            FROM LPDATAMART.TBL_D_SMS
+            FROM LPDATAMART.TBL_D_SMS a
             WHERE MESSAGE_NAME = 'UNKNOWN'
+            AND NOT EXISTS(
+                SELECT 1 FROM REPORTS.WUNDERKIND_SMS_CAMPAIGN_DATA b
+                WHERE a.MESSAGE_ID = b.CAMPAIGN_ID
+            )
             ORDER BY MESSAGE_ID
         """
 

@@ -590,9 +590,9 @@
                     </button>
                 </div>
                 
-                <!-- Alert Messages for Update Form -->
-                <div id="alertContainer" style="margin-top: 20px;"></div>
             </form>
+            <!-- Alert Messages for Update Form -->
+            <div id="alertContainer" style="margin-top: 20px;"></div>
         </div>
             </div>
             <!-- End Bluecore Tab -->
@@ -767,9 +767,9 @@
                     </button>
                 </div>
                 
-                <!-- Alert Messages for Wunderkind Update Form -->
-                <div id="wunderkindAlertContainer" style="margin-top: 20px;"></div>
             </form>
+            <!-- Alert Messages for Wunderkind Update Form -->
+            <div id="wunderkindAlertContainer" style="margin-top: 20px;"></div>
         </div>
             </div>
             <!-- End Wunderkind Tab -->
@@ -1018,9 +1018,9 @@
                     </button>
                 </div>
 
-                <!-- Alert Messages for SMS Update Form -->
-                <div id="smsUpdateAlertContainer" style="margin-top: 20px;"></div>
             </form>
+            <!-- Alert Messages for SMS Update Form -->
+            <div id="smsUpdateAlertContainer" style="margin-top: 20px;"></div>
         </div>
             </div>
             <!-- End Wunderkind SMS Tab -->
@@ -1388,8 +1388,8 @@
                 
                 if (result.success) {
                     const message = `Update BC_ID-${formData.bc_id}: "${formData.general_campaign_name}" - ${formData.deployment_date}`;
-                    showAlert(message, 'success');
                     resetUpdateForm();
+                    showAlert(message, 'success');
                 } else {
                     showAlert('Error: ' + result.error, 'danger');
                 }
@@ -1763,8 +1763,8 @@
                 
                 if (result.success) {
                     const message = `Update Campaign_ID-${formData.campaign_id}: "${formData.general_campaign_name}"`;
-                    showWunderkindAlert(message, 'success');
                     resetWunderkindUpdateForm();
+                    showWunderkindAlert(message, 'success');
                 } else {
                     showWunderkindAlert('Error: ' + result.error, 'danger');
                 }
@@ -2185,6 +2185,7 @@
                 const result = await response.json();
 
                 if (result.success) {
+                    resetSMSUpdateForm();
                     showSMSUpdateAlert(result.message, 'success');
                 } else {
                     showSMSUpdateAlert(result.error || 'Error updating data', 'danger');
