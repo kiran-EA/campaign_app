@@ -428,6 +428,11 @@ def get_wunderkind_campaign_ids():
                 SELECT 1 FROM REPORTS.TBL_WUNDERKIND_CAMPAIGN_DATA b
                 WHERE a.ISSUE_KEY = CAST(CAST(b.CAMPAIGN_ID AS BIGINT) AS VARCHAR)
             )
+            AND NOT EXISTS(
+                SELECT 1 FROM reports.tbl_campaign_exclude c
+                WHERE a.ISSUE_KEY = CAST(c.campaign_id AS VARCHAR)
+                AND c.campaign_vendor = 'WUNDERKIND EMAIL'
+            )
             ORDER BY ISSUE_KEY
         """
         
@@ -765,8 +770,7 @@ def get_excluded_bc_ids():
         query = """
             SELECT campaign_id, campaign_vendor, load_date
             FROM reports.tbl_campaign_exclude
-            WHERE campaign_vendor = 'BLUECORE'
-            ORDER BY load_date DESC
+            ORDER BY campaign_vendor, load_date DESC
         """
 
         cur.execute(query)
@@ -790,10 +794,11 @@ def get_excluded_bc_ids():
 @app.route('/api/include_bc_id', methods=['POST'])
 @login_required
 def include_bc_id():
-    """Remove BC_ID from reports.tbl_campaign_exclude (include it back)"""
+    """Remove a campaign ID from reports.tbl_campaign_exclude (include it back)"""
     try:
         data = request.json
         bc_id = data.get('bc_id')
+        campaign_vendor = data.get('campaign_vendor', 'BLUECORE')
 
         conn = get_db_connection()
         cur = conn.cursor()
@@ -801,10 +806,10 @@ def include_bc_id():
         delete_query = """
             DELETE FROM reports.tbl_campaign_exclude
             WHERE campaign_id = %s
-            AND campaign_vendor = 'BLUECORE'
+            AND campaign_vendor = %s
         """
 
-        cur.execute(delete_query, (bc_id,))
+        cur.execute(delete_query, (bc_id, campaign_vendor))
         conn.commit()
         cur.close()
         conn.close()
@@ -813,6 +818,56 @@ def include_bc_id():
         return jsonify({'success': True, 'message': f'BC_ID {bc_id} included back successfully'})
     except Exception as e:
         logger.error(f"Error including BC_ID: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/exclude_wunderkind_id', methods=['POST'])
+@login_required
+def exclude_wunderkind_id():
+    """Insert Wunderkind Campaign ID into reports.tbl_campaign_exclude"""
+    try:
+        data = request.json
+        campaign_id = data.get('campaign_id')
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            INSERT INTO reports.tbl_campaign_exclude (campaign_id, campaign_vendor, load_date)
+            VALUES (%s, 'WUNDERKIND EMAIL', CURRENT_TIMESTAMP)
+        """, (campaign_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        logger.info(f"Successfully excluded Wunderkind Campaign ID: {campaign_id}")
+        return jsonify({'success': True, 'message': f'Campaign ID {campaign_id} excluded successfully'})
+    except Exception as e:
+        logger.error(f"Error excluding Wunderkind Campaign ID: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/exclude_sms_id', methods=['POST'])
+@login_required
+def exclude_sms_id():
+    """Insert SMS Message ID into reports.tbl_campaign_exclude"""
+    try:
+        data = request.json
+        message_id = data.get('message_id')
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            INSERT INTO reports.tbl_campaign_exclude (campaign_id, campaign_vendor, load_date)
+            VALUES (%s, 'WUNDERKIND SMS', CURRENT_TIMESTAMP)
+        """, (message_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        logger.info(f"Successfully excluded SMS Message ID: {message_id}")
+        return jsonify({'success': True, 'message': f'Message ID {message_id} excluded successfully'})
+    except Exception as e:
+        logger.error(f"Error excluding SMS Message ID: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/exclude_bc_id', methods=['POST'])
@@ -959,6 +1014,11 @@ def get_sms_message_ids():
             AND NOT EXISTS(
                 SELECT 1 FROM REPORTS.WUNDERKIND_SMS_CAMPAIGN_DATA b
                 WHERE a.MESSAGE_ID = b.CAMPAIGN_ID
+            )
+            AND NOT EXISTS(
+                SELECT 1 FROM reports.tbl_campaign_exclude c
+                WHERE a.MESSAGE_ID = c.campaign_id
+                AND c.campaign_vendor = 'WUNDERKIND SMS'
             )
             ORDER BY MESSAGE_ID
         """
