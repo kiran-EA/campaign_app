@@ -414,6 +414,11 @@
                     <i class="bi bi-table"></i> Wunderkind SMS Records
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="excluded-bc-tab" data-bs-toggle="tab" data-bs-target="#excluded-bc-content" type="button" role="tab">
+                    <i class="bi bi-slash-circle-fill"></i> Excluded Bluecore Campaign
+                </button>
+            </li>
         </ul>
 
         <!-- Tab Content -->
@@ -460,6 +465,15 @@
                         <option value="">Loading BC_IDs...</option>
                     </select>
                     <small class="form-text text-muted">Select a BC_ID from available campaigns without data</small>
+                    <div id="excludeBcIdSection" style="display:none; margin-top:8px; align-items:center; gap:12px;">
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" id="excludeCheckbox" onchange="toggleExcludeBtn()">
+                            <label class="form-check-label fw-bold" for="excludeCheckbox">Exclude</label>
+                        </div>
+                        <button type="button" class="btn btn-outline-dark btn-sm" id="excludeBcIdBtn" onclick="excludeBcId()" disabled>
+                            Exclude BC_ID
+                        </button>
+                    </div>
                 </div>
 
                 <div class="form-section">
@@ -1078,6 +1092,54 @@
                 </div>
             </div>
             <!-- End SMS Campaign Records Tab -->
+
+            <!-- Excluded Bluecore Campaign Tab -->
+            <div class="tab-pane fade" id="excluded-bc-content" role="tabpanel">
+                <div class="platform-indicator">
+                    <i class="bi bi-slash-circle-fill"></i> Excluded Bluecore Campaign
+                </div>
+
+                <div class="info-box">
+                    <strong><i class="bi bi-info-circle"></i> View Mode:</strong>
+                    BC_IDs listed here have been excluded from campaign data entry. Click <strong>Include</strong> to restore a BC_ID back to the dropdown.
+                </div>
+
+                <!-- Loading Spinner -->
+                <div class="loading" id="excludedBcLoadingSpinner" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading excluded BC_IDs...</p>
+                </div>
+
+                <!-- Alert Messages -->
+                <div id="excludedBcAlertContainer"></div>
+
+                <!-- Table -->
+                <div id="excludedBcTableContainer" style="display: none;">
+                    <div style="margin-bottom: 15px;">
+                        <strong>Total Records: <span id="excludedBcCount">0</span></strong>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-danger">
+                                <tr>
+                                    <th>BC_ID</th>
+                                    <th>Excluded On</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="excludedBcTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- No Records Message -->
+                <div id="noExcludedBcMessage" style="display: none;" class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No excluded BC_IDs found.
+                </div>
+            </div>
+            <!-- End Excluded Bluecore Campaign Tab -->
         </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -1166,7 +1228,18 @@
                 tomBcId = new TomSelect(select, {
                     create: false,
                     placeholder: '-- Search BC_ID --',
-                    onChange: function(value) { toggleInsertFormFields(value !== ''); }
+                    onChange: function(value) {
+                        const hasValue = value !== '' && value !== null && value !== undefined;
+                        toggleInsertFormFields(hasValue);
+                        const excl = document.getElementById('excludeBcIdSection');
+                        if (excl) {
+                            excl.style.setProperty('display', hasValue ? 'flex' : 'none', 'important');
+                            if (!hasValue) {
+                                document.getElementById('excludeCheckbox').checked = false;
+                                document.getElementById('excludeBcIdBtn').disabled = true;
+                            }
+                        }
+                    }
                 });
                 console.warn(`✓ loadBCIds COMPLETE: ${bcOptions.length} items loaded`);
 
@@ -1188,9 +1261,56 @@
                     }
                 }
             });
-            
+
             if (!enable) {
                 document.getElementById('derivedFields').style.display = 'none';
+            }
+
+            // Show/hide exclude section
+            const excludeSection = document.getElementById('excludeBcIdSection');
+            if (excludeSection) {
+                excludeSection.style.setProperty('display', enable ? 'flex' : 'none', 'important');
+                if (!enable) {
+                    document.getElementById('excludeCheckbox').checked = false;
+                    document.getElementById('excludeBcIdBtn').disabled = true;
+                }
+            }
+        }
+
+        function toggleExcludeBtn() {
+            const checkbox = document.getElementById('excludeCheckbox');
+            document.getElementById('excludeBcIdBtn').disabled = !checkbox.checked;
+        }
+
+        async function excludeBcId() {
+            const bcId = tomBcId ? tomBcId.getValue() : document.getElementById('bc_id').value;
+            if (!bcId) {
+                showAlert('Please select a BC_ID first', 'warning');
+                return;
+            }
+
+            try {
+                showLoading(true);
+                const response = await fetch('/api/exclude_bc_id', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ bc_id: bcId })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(`BC_ID ${bcId} has been excluded successfully`, 'success');
+                    resetForm();
+                    loadBCIds();
+                } else {
+                    showAlert('Error: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error excluding BC_ID: ' + error.message, 'danger');
+            } finally {
+                showLoading(false);
             }
         }
 
@@ -2352,6 +2472,97 @@
         }
 
         // ============================================
+        // EXCLUDED BLUECORE CAMPAIGN FUNCTIONS
+        // ============================================
+
+        async function loadExcludedBcIds() {
+            const spinner = document.getElementById('excludedBcLoadingSpinner');
+            const tableContainer = document.getElementById('excludedBcTableContainer');
+            const noRecordsMsg = document.getElementById('noExcludedBcMessage');
+            const alertContainer = document.getElementById('excludedBcAlertContainer');
+
+            if (spinner) spinner.style.display = 'block';
+            if (tableContainer) tableContainer.style.display = 'none';
+            if (noRecordsMsg) noRecordsMsg.style.display = 'none';
+            if (alertContainer) alertContainer.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/get_excluded_bc_ids', {
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    const tbody = document.getElementById('excludedBcTableBody');
+                    tbody.innerHTML = '';
+
+                    if (result.data.length === 0) {
+                        if (noRecordsMsg) noRecordsMsg.style.display = 'block';
+                    } else {
+                        document.getElementById('excludedBcCount').textContent = result.data.length;
+                        result.data.forEach(row => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td><strong>${row.campaign_id}</strong></td>
+                                <td>${row.load_date || '-'}</td>
+                                <td>
+                                    <button class="btn btn-success btn-sm" onclick="includeBcId('${row.campaign_id}', this)">
+                                        <i class="bi bi-check-circle"></i> Include
+                                    </button>
+                                </td>`;
+                            tbody.appendChild(tr);
+                        });
+                        if (tableContainer) tableContainer.style.display = 'block';
+                    }
+                } else {
+                    if (alertContainer) alertContainer.innerHTML = `<div class="alert alert-danger">${result.error}</div>`;
+                }
+            } catch (error) {
+                if (alertContainer) alertContainer.innerHTML = `<div class="alert alert-danger">Error loading data: ${error.message}</div>`;
+            } finally {
+                if (spinner) spinner.style.display = 'none';
+            }
+        }
+
+        async function includeBcId(bcId, btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+            try {
+                const response = await fetch('/api/include_bc_id', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ bc_id: bcId })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    btn.closest('tr').remove();
+                    const countEl = document.getElementById('excludedBcCount');
+                    const newCount = parseInt(countEl.textContent) - 1;
+                    countEl.textContent = newCount;
+                    if (newCount === 0) {
+                        document.getElementById('excludedBcTableContainer').style.display = 'none';
+                        document.getElementById('noExcludedBcMessage').style.display = 'block';
+                    }
+                    loadBCIds();
+                } else {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-check-circle"></i> Include';
+                    const alertContainer = document.getElementById('excludedBcAlertContainer');
+                    if (alertContainer) alertContainer.innerHTML = `<div class="alert alert-danger">${result.error}</div>`;
+                }
+            } catch (error) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check-circle"></i> Include';
+                const alertContainer = document.getElementById('excludedBcAlertContainer');
+                if (alertContainer) alertContainer.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            }
+        }
+
+        // ============================================
         // INITIALIZATION - RUN AFTER ALL FUNCTIONS DEFINED
         // ============================================
         console.warn('=== SCRIPT LOADED, WAITING FOR DOM ===');
@@ -2437,6 +2648,13 @@
             if (smsRecordsTab) {
                 smsRecordsTab.addEventListener('shown.bs.tab', function() {
                     loadSMSCampaignRecords();
+                });
+            }
+
+            const excludedBcTab = document.getElementById('excluded-bc-tab');
+            if (excludedBcTab) {
+                excludedBcTab.addEventListener('shown.bs.tab', function() {
+                    loadExcludedBcIds();
                 });
             }
 

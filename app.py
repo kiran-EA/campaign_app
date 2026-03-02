@@ -110,13 +110,18 @@ def get_bc_ids():
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
         query = """
-            SELECT DISTINCT ISSUE_KEY AS bc_id 
+            SELECT DISTINCT ISSUE_KEY AS bc_id
             FROM LPDATAMART.TBL_D_ISSUE a
-            WHERE GENERAL_CAMPAIGN_NAME IS NULL 
+            WHERE GENERAL_CAMPAIGN_NAME IS NULL
             AND SOURCE='BLUECORE'
             AND NOT EXISTS(
-                SELECT 1 FROM REPORTS.TBL_BLUECORE_CAMPAIGN_DATA b 
+                SELECT 1 FROM REPORTS.TBL_BLUECORE_CAMPAIGN_DATA b
                 WHERE a.ISSUE_KEY = CAST(CAST(b.bc_id AS BIGINT) AS VARCHAR)
+            )
+            AND NOT EXISTS(
+                SELECT 1 FROM reports.tbl_campaign_exclude c
+                WHERE a.ISSUE_KEY = CAST(c.campaign_id AS VARCHAR)
+                AND c.campaign_vendor = 'BLUECORE'
             )
             ORDER BY ISSUE_KEY
         """
@@ -744,6 +749,101 @@ def update_wunderkind_campaign():
         
     except Exception as e:
         logger.error(f"Error updating campaign: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/get_excluded_bc_ids', methods=['GET'])
+@login_required
+def get_excluded_bc_ids():
+    """Fetch all excluded BC_IDs from reports.tbl_campaign_exclude"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        query = """
+            SELECT campaign_id, campaign_vendor, load_date
+            FROM reports.tbl_campaign_exclude
+            WHERE campaign_vendor = 'BLUECORE'
+            ORDER BY load_date DESC
+        """
+
+        cur.execute(query)
+        results = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        data = []
+        for row in results:
+            data.append({
+                'campaign_id': str(int(row['campaign_id'])) if row['campaign_id'] is not None else None,
+                'campaign_vendor': row['campaign_vendor'],
+                'load_date': row['load_date'].strftime('%d-%m-%Y %H:%M') if row['load_date'] else None
+            })
+
+        return jsonify({'success': True, 'data': data, 'count': len(data)})
+    except Exception as e:
+        logger.error(f"Error fetching excluded BC_IDs: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/include_bc_id', methods=['POST'])
+@login_required
+def include_bc_id():
+    """Remove BC_ID from reports.tbl_campaign_exclude (include it back)"""
+    try:
+        data = request.json
+        bc_id = data.get('bc_id')
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        delete_query = """
+            DELETE FROM reports.tbl_campaign_exclude
+            WHERE campaign_id = %s
+            AND campaign_vendor = 'BLUECORE'
+        """
+
+        cur.execute(delete_query, (bc_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        logger.info(f"Successfully included BC_ID back: {bc_id}")
+        return jsonify({'success': True, 'message': f'BC_ID {bc_id} included back successfully'})
+    except Exception as e:
+        logger.error(f"Error including BC_ID: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/exclude_bc_id', methods=['POST'])
+@login_required
+def exclude_bc_id():
+    """Insert BC_ID into reports.tbl_campaign_exclude"""
+    try:
+        data = request.json
+        bc_id = data.get('bc_id')
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        insert_query = """
+            INSERT INTO reports.tbl_campaign_exclude (campaign_id, campaign_vendor, load_date)
+            VALUES (%s, 'BLUECORE', CURRENT_TIMESTAMP)
+        """
+
+        cur.execute(insert_query, (bc_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        logger.info(f"Successfully excluded BC_ID: {bc_id}")
+
+        return jsonify({
+            'success': True,
+            'message': f'BC_ID {bc_id} excluded successfully'
+        })
+    except Exception as e:
+        logger.error(f"Error excluding BC_ID: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)
