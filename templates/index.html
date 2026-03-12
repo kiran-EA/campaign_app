@@ -460,7 +460,12 @@
 
             <form id="campaignForm" onsubmit="submitForm(event)">
                 <div class="form-section">
-                    <label for="bc_id" class="form-label required">BC_ID</label>
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                        <label for="bc_id" class="form-label required mb-0">BC_ID</label>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportBcIds()" title="Export BC_IDs as .txt">
+                            <i class="bi bi-download"></i> Export
+                        </button>
+                    </div>
                     <select class="form-select" id="bc_id" required>
                         <option value="">Loading BC_IDs...</option>
                     </select>
@@ -649,7 +654,12 @@
 
             <form id="wunderkindCampaignForm" onsubmit="submitWunderkindForm(event)">
                 <div class="form-section">
-                    <label for="wunderkind_campaign_id" class="form-label required">Campaign ID</label>
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                        <label for="wunderkind_campaign_id" class="form-label required mb-0">Campaign ID</label>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportWunderkindIds()" title="Export Campaign IDs as .txt">
+                            <i class="bi bi-download"></i> Export
+                        </button>
+                    </div>
                     <select class="form-select" id="wunderkind_campaign_id" required onchange="fetchWunderkindCampaignName()">
                         <option value="">Loading Campaign IDs...</option>
                     </select>
@@ -944,7 +954,12 @@
 
             <form id="smsCampaignForm" onsubmit="submitSMSForm(event)">
                 <div class="form-section">
-                    <label for="sms_message_id" class="form-label required">Message ID</label>
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                        <label for="sms_message_id" class="form-label required mb-0">Message ID</label>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportSmsIds()" title="Export Message IDs as .txt">
+                            <i class="bi bi-download"></i> Export
+                        </button>
+                    </div>
                     <select class="form-select" id="sms_message_id" required>
                         <option value="">Loading Message IDs...</option>
                     </select>
@@ -1295,6 +1310,60 @@
                     document.getElementById('excludeBcIdBtn').disabled = true;
                 }
             }
+        }
+
+        function exportBcIds() {
+            const select = document.getElementById('bc_id');
+            const ids = Array.from(select.options)
+                .map(opt => opt.value)
+                .filter(v => v !== '');
+            if (ids.length === 0) {
+                showAlert('No BC_IDs available to export.', 'warning');
+                return;
+            }
+            const blob = new Blob([ids.join('\n')], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'bc_ids.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportWunderkindIds() {
+            const select = document.getElementById('wunderkind_campaign_id');
+            const ids = Array.from(select.options)
+                .map(opt => opt.value)
+                .filter(v => v !== '');
+            if (ids.length === 0) {
+                showWunderkindAlert('No Campaign IDs available to export.', 'warning');
+                return;
+            }
+            const blob = new Blob([ids.join('\n')], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'wunderkind_campaign_ids.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportSmsIds() {
+            const select = document.getElementById('sms_message_id');
+            const ids = Array.from(select.options)
+                .map(opt => opt.value)
+                .filter(v => v !== '');
+            if (ids.length === 0) {
+                showSmsAlert('No Message IDs available to export.', 'warning');
+                return;
+            }
+            const blob = new Blob([ids.join('\n')], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sms_message_ids.txt';
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         function toggleExcludeBtn() {
