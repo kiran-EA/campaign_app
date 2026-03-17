@@ -1262,6 +1262,7 @@
                 });
                 tomBcId = new TomSelect(select, {
                     create: false,
+                    maxOptions: null,
                     placeholder: '-- Search BC_ID --',
                     onChange: function(value) {
                         const hasValue = value !== '' && value !== null && value !== undefined;
@@ -1692,6 +1693,7 @@
                 });
                 tomWunderkindId = new TomSelect(select, {
                     create: false,
+                    maxOptions: null,
                     placeholder: '-- Search Campaign ID --',
                     onChange: function(value) {
                         const hasValue = value !== '' && value !== null && value !== undefined;
@@ -2261,6 +2263,7 @@
             if (!el) return null;
             return new TomSelect(el, {
                 create: false,
+                maxOptions: null,
                 sortField: { field: 'text', direction: 'asc' },
                 placeholder: '-- Search or select --',
                 onChange: onChangeFn || function() {}
@@ -2318,6 +2321,7 @@
                     });
                     tomSmsId = new TomSelect(select, {
                         create: false,
+                        maxOptions: null,
                         placeholder: '-- Search Message ID --',
                         onChange: function(value) {
                             const hasValue = value !== '' && value !== null && value !== undefined;
