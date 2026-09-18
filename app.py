@@ -50,8 +50,8 @@ DB_CONFIG = {
     'database': 'express',
     'host': 'ea-non-prod.cxw4zfxatj9b.us-west-1.redshift.amazonaws.com',
     'port': '5439',
-    'user': 'easuper',
-    'password': 'LAMRedPWD@2024'
+    'user': 'lpmainuser',
+    'password': 'nRnf7ZXh$Ut.'
 }
 
 @contextmanager
